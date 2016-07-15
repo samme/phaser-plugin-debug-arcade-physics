@@ -1,6 +1,6 @@
 
 /*
-  Debug Arcade Physics plugin v0.0.0.23 for Phaser
+  Debug Arcade Physics plugin v0.0.0.25 for Phaser
  */
 
 (function() {
@@ -32,7 +32,7 @@
       return game.plugins.add(this);
     };
 
-    DebugArcadePhysics.version = version = "0.0.0.23";
+    DebugArcadePhysics.version = version = "0.0.0.25";
 
     red = "hsla(0  , 100%,  50%, 0.5)";
 
