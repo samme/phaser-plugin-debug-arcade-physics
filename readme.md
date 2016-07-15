@@ -1,9 +1,9 @@
-![Screenshot](https://github.com/samme/phaser-plugin-debug-arcade-physics/screenshot.png)
+![Screenshot](https://samme.github.io/phaser-plugin-debug-arcade-physics/screenshot.png)
 
 # Phaser Debug Arcade Physics Plugin 🚀
 
 Draws properties of Arcade Physics bodies.
-[Demo](https://github.com/samme/phaser-plugin-debug-arcade-physics/)
+[Demo](https://samme.github.io/phaser-plugin-debug-arcade-physics/)
 
     game.plugins.add(Phaser.Plugin.DebugArcadePhysics);
 
