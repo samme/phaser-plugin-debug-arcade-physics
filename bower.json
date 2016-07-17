@@ -2,6 +2,9 @@
   "name": "phaser-plugin-debug-arcade-physics",
   "description": "Phaser plugin draws properties of Arcade Physics bodies",
   "main": "dist/DebugArcadePhysics.js",
+  "dependencies": {
+    "phaser": "2.*"
+  },
   "authors": [
     "samme"
   ],
