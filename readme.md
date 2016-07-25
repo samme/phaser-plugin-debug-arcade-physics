@@ -23,16 +23,21 @@ game.debug.arcade.renderObj( player );
 // Optional: configure
 
 game.debug.arcade.configSet({
-    filter:             null,
-    lineWidth:          1   ,
-    on:                 true,
-    renderAcceleration: true,
-    renderBody:         true,
-    renderCenter:       true,
-    renderDrag:         true,
-    renderMaxVelocity:  true,
-    renderLegend:       true,
-    renderSpeed:        true,
+    filter:             null ,
+    lineWidth:          1    ,
+    on:                 true ,
+    renderAcceleration: true ,
+    renderBlocked:      true ,
+    renderBody:         true ,
+    renderBodyDisabled: true ,
+    renderCenter:       true ,
+    renderConfig:       false,
+    renderDelta:        false,
+    renderDrag:         true ,
+    renderMaxVelocity:  true ,
+    renderLegend:       true ,
+    renderSpeed:        true ,
+    renderTouching:     true ,
     renderVelocity:     true
 }); // -> see console for values
 
