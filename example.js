@@ -4,7 +4,7 @@
  */
 
 (function() {
-  var ADD, Asteroid, SQRT1_2, asteroids, bullet, bulletTime, bullets, create, cursors, fireBullet, init, min, mixin, preload, render, screenWrap, sprite, update,
+  var ADD, Asteroid, MINUTE, Quadratic, SECOND, SQRT1_2, Sinusoidal, asteroids, bullet, bulletTime, bullets, create, cursors, fireBullet, font, init, min, mixin, preload, ref, ref1, render, screenWrap, sprite, toggleDim, toggleVisible, update,
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
@@ -20,9 +20,15 @@
 
   asteroids = void 0;
 
+  font = "16px Consolas, Menlo, monospace";
+
   min = Math.min, SQRT1_2 = Math.SQRT1_2;
 
   ADD = Phaser.blendModes.ADD;
+
+  ref = Phaser.Easing, Quadratic = ref.Quadratic, Sinusoidal = ref.Sinusoidal;
+
+  ref1 = Phaser.Timer, MINUTE = ref1.MINUTE, SECOND = ref1.SECOND;
 
   mixin = Phaser.Utils.mixin;
 
@@ -84,10 +90,12 @@
   })(Phaser.Sprite);
 
   init = function() {
-    game.debug.font = "16px monospace";
+    game.debug.font = font;
     game.debug.lineHeight = 20;
+    game.renderer.clearBeforeRender = false;
+    game.renderer.roundPixels = true;
+    game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
     game.plugins.add(Phaser.Plugin.DebugArcadePhysics);
-    game.scale.scaleMode = Phaser.ScaleManager.NO_SCALE;
   };
 
   preload = function() {
@@ -100,11 +108,16 @@
   };
 
   create = function() {
-    var space;
-    game.renderer.clearBeforeRender = false;
-    game.renderer.roundPixels = true;
+    var fun, key, keyboard, ref2, space;
     game.physics.startSystem(Phaser.Physics.ARCADE);
-    space = game.add.tileSprite(0, 0, game.width, game.height, 'space');
+    space = game.world.space = game.add.tileSprite(0, 0, game.width, game.height, 'space');
+    space.tilePosition.set(game.world.randomX, game.world.randomY);
+    if (game.renderType === Phaser.WEBGL) {
+      game.add.tween(space.tileScale).to({
+        x: 2,
+        y: 2
+      }, 1 * MINUTE, Sinusoidal.InOut, true, 0, 1e6, true);
+    }
     bullets = game.add.group();
     bullets.enableBody = true;
     bullets.physicsBodyType = Phaser.Physics.ARCADE;
@@ -123,8 +136,31 @@
     asteroids = game.add.group(game.world, "asteroids", false, true);
     asteroids.classType = Asteroid;
     asteroids.createMultiple(5, null, null, true);
-    cursors = game.input.keyboard.createCursorKeys();
-    game.input.keyboard.addKeyCapture([Phaser.Keyboard.SPACEBAR]);
+    keyboard = game.input.keyboard;
+    cursors = keyboard.createCursorKeys();
+    keyboard.addKeyCapture([Phaser.Keyboard.SPACEBAR]);
+    ref2 = {
+      D: toggleDim,
+      F: function() {
+        if (game.stepping) {
+          return game.disableStep();
+        } else {
+          return game.enableStep();
+        }
+      },
+      R: function() {
+        return game.state.restart();
+      },
+      S: function() {
+        return game.step();
+      },
+      T: game.debug.arcade.toggle,
+      V: toggleVisible
+    };
+    for (key in ref2) {
+      fun = ref2[key];
+      keyboard.addKey(Phaser.Keyboard[key]).onDown.add(fun);
+    }
   };
 
   update = function() {
@@ -178,7 +214,24 @@
     }
   };
 
-  render = function() {};
+  render = function() {
+    game.debug.text("(T)oggle / (D)im / in(V)isible / (F)reeze / (S)tep 1 frame / (R)estart", 10, 450, null, "12px Consolas, Menlo, monospace");
+    return game.debug.text("v" + Phaser.Plugin.DebugArcadePhysics.version, 10, 470, null, "12px Consolas, Menlo, monospace");
+  };
+
+  toggleDim = function() {
+    var onOrOff;
+    onOrOff = !game.world.space.visible;
+    game.world.space.visible = onOrOff;
+    game.renderer.clearBeforeRender = !onOrOff;
+  };
+
+  toggleVisible = function() {
+    var visible;
+    visible = game.world.alpha !== 1;
+    game.world.alpha = +visible;
+    game.renderer.clearBeforeRender = !visible;
+  };
 
   this.game = new Phaser.Game(960, 480, Phaser.CANVAS, 'phaser-example', {
     init: init,
