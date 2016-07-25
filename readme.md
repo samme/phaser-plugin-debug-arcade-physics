@@ -5,32 +5,46 @@
 Draws properties of Arcade Physics bodies.
 [Demo](https://samme.github.io/phaser-plugin-debug-arcade-physics/)
 
-    game.plugins.add(Phaser.Plugin.DebugArcadePhysics);
+```javascript
+game.plugins.add(Phaser.Plugin.DebugArcadePhysics);
 
-    // Draw every physics body
+// Draw every physics body
 
-    game.debug.arcade.on()
+game.debug.arcade.on()
 
-    // Draw none
+// Draw none
 
-    game.debug.arcade.off()
+game.debug.arcade.off()
 
-    // Draw one
+// Draw one
 
-    game.debug.arcade.renderObj( player );
+game.debug.arcade.renderObj( player );
 
-    // Optional: configure
+// Optional: configure
 
-    game.debug.arcade.configSet({
-        filter:             null,
-        lineWidth:          1   ,
-        on:                 yes ,
-        renderAcceleration: yes ,
-        renderBody:         yes ,
-        renderCenter:       yes ,
-        renderDrag:         yes ,
-        renderMaxVelocity:  yes ,
-        renderLegend:       yes ,
-        renderSpeed:        yes ,
-        renderVelocity:     yes
-    }); // -> see console for values
+game.debug.arcade.configSet({
+    filter:             null,
+    lineWidth:          1   ,
+    on:                 true,
+    renderAcceleration: true,
+    renderBody:         true,
+    renderCenter:       true,
+    renderDrag:         true,
+    renderMaxVelocity:  true,
+    renderLegend:       true,
+    renderSpeed:        true,
+    renderVelocity:     true
+}); // -> see console for values
+
+// Example:
+// Keep automatic rendering 'on' and choose:
+
+game.debug.arcade.configSet({
+    filter: function (obj){
+        return obj.name === "player";
+        // OR obj.parent.name === "asteroids"
+        // OR obj.type === Phaser.PARTICLE
+        // &c.
+    }
+});
+```
