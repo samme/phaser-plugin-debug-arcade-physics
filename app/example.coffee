@@ -8,8 +8,12 @@ bullet = undefined
 bullets = undefined
 bulletTime = 0
 asteroids = undefined
+font = "16px Consolas, Menlo, monospace"
+
 {min, SQRT1_2} = Math
 {ADD} = Phaser.blendModes
+{Quadratic, Sinusoidal} = Phaser.Easing
+{MINUTE, SECOND} = Phaser.Timer
 {mixin} = Phaser.Utils
 
 class Asteroid extends Phaser.Sprite
@@ -52,10 +56,16 @@ class Asteroid extends Phaser.Sprite
     return
 
 init = ->
-  game.debug.font = "16px monospace"
+  game.debug.font = font
   game.debug.lineHeight = 20
-  game.plugins.add Phaser.Plugin.DebugArcadePhysics
-  game.scale.scaleMode = Phaser.ScaleManager.NO_SCALE # SHOW_ALL
+
+  #  This will run in Canvas mode, so let's gain a little speed and display
+  game.renderer.clearBeforeRender = false
+  game.renderer.roundPixels = true
+
+  game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL
+
+  game.plugins.add(Phaser.Plugin.DebugArcadePhysics)
   return
 
 preload = ->
@@ -68,15 +78,16 @@ preload = ->
   return
 
 create = ->
-  #  This will run in Canvas mode, so let's gain a little speed and display
-  game.renderer.clearBeforeRender = false
-  game.renderer.roundPixels = true
-
   #  We need arcade physics
   game.physics.startSystem Phaser.Physics.ARCADE
 
   #  A spacey background
-  space = game.add.tileSprite 0, 0, game.width, game.height, 'space'
+  space = game.world.space = game.add.tileSprite 0, 0, game.width, game.height, 'space'
+  space.tilePosition.set game.world.randomX, game.world.randomY
+
+  if game.renderType is Phaser.WEBGL
+    game.add.tween(space.tileScale).to {x: 2, y: 2},
+      1 * MINUTE, Sinusoidal.InOut, yes, 0, 1e6, yes
 
   #  Our ships bullets
   bullets = game.add.group()
@@ -105,8 +116,20 @@ create = ->
   asteroids.createMultiple 5, null, null, yes
 
   #  Game input
-  cursors = game.input.keyboard.createCursorKeys()
-  game.input.keyboard.addKeyCapture [ Phaser.Keyboard.SPACEBAR ]
+  {keyboard} = game.input
+  cursors = keyboard.createCursorKeys()
+  keyboard.addKeyCapture [ Phaser.Keyboard.SPACEBAR ]
+
+  for key, fun of {
+    D:    toggleDim
+    F: -> if game.stepping then game.disableStep() else game.enableStep()
+    R: -> game.state.restart()
+    S: -> game.step()
+    T:    game.debug.arcade.toggle
+    V:    toggleVisible
+  }
+    keyboard.addKey(Phaser.Keyboard[ key ]).onDown.add fun
+
   return
 
 update = ->
@@ -148,6 +171,27 @@ screenWrap = (sprite) ->
   return
 
 render = ->
+  game.debug.text "(T)oggle /
+                   (D)im /
+                   in(V)isible /
+                   (F)reeze /
+                   (S)tep 1 frame /
+                   (R)estart",
+                   10, 450, null, "12px Consolas, Menlo, monospace"
+  game.debug.text "v#{Phaser.Plugin.DebugArcadePhysics.version}",
+                   10, 470, null, "12px Consolas, Menlo, monospace"
+
+toggleDim = ->
+  onOrOff = not game.world.space.visible
+  game.world.space.visible = onOrOff
+  game.renderer.clearBeforeRender = not onOrOff
+  return
+
+toggleVisible = ->
+  visible = game.world.alpha isnt 1
+  game.world.alpha = +visible
+  game.renderer.clearBeforeRender = not visible
+  return
 
 @game = new (Phaser.Game)(960, 480, Phaser.CANVAS, 'phaser-example',
   init: init
