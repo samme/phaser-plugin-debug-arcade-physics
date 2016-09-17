@@ -2,20 +2,28 @@
   "name": "phaser-plugin-debug-arcade-physics",
   "description": "Phaser plugin draws properties of Arcade Physics bodies",
   "main": "dist/DebugArcadePhysics.js",
-  "dependencies": {
-    "phaser": "2.*"
-  },
   "authors": [
     "samme"
   ],
   "license": "MIT",
-  "homepage": "https://github.com/samme/phaser-plugin-debug-arcade-physics/",
+  "homepage": "https://github.com/samme/phaser-plugin-debug-arcade-physics",
   "private": true,
   "ignore": [
     "**/.*",
     "node_modules",
     "bower_components",
     "test",
-    "tests"
+    "tests",
+    "brunch-config.coffee",
+    "dist/asteroids",
+    "dist/example.js",
+    "dist/index.html",
+    "dist/screenshot.png"
+  ],
+  "dependencies": {
+    "phaser": "*"
+  },
+  "ignoredDependencies": [
+    "phaser"
   ]
 }

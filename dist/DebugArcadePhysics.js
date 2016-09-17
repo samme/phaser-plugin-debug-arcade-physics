@@ -1,11 +1,11 @@
 
 /*
-  Debug Arcade Physics plugin v0.1.0.1 for Phaser
+  Debug Arcade Physics plugin v0.2.0.21 for Phaser
  */
 
 (function() {
   "use strict";
-  var ARCADE, Circle, DebugArcadePhysics, Line, Plugin, Point, Rectangle, abs, freeze, max, seal, sign,
+  var ARCADE, Bullet, Circle, DebugArcadePhysics, Line, PARTICLE, Plugin, Point, Rectangle, SPRITE, abs, freeze, max, seal, sign,
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
@@ -13,14 +13,14 @@
 
   freeze = Object.freeze, seal = Object.seal;
 
-  Circle = Phaser.Circle, Line = Phaser.Line, Plugin = Phaser.Plugin, Point = Phaser.Point, Rectangle = Phaser.Rectangle;
+  Bullet = Phaser.Bullet, Circle = Phaser.Circle, Line = Phaser.Line, PARTICLE = Phaser.PARTICLE, Plugin = Phaser.Plugin, Point = Phaser.Point, Rectangle = Phaser.Rectangle, SPRITE = Phaser.SPRITE;
 
   sign = Phaser.Math.sign;
 
   ARCADE = Phaser.Physics.ARCADE;
 
   Phaser.Plugin.DebugArcadePhysics = freeze(DebugArcadePhysics = (function(superClass) {
-    var TOO_BIG, _acceleration, _delta, _drag, _dragVector, _maxVelocity, _speed, _velocity, aqua, blue, colors, config, gray, green, indigo, orange, purple, red, rose, rust, version, violet, white, yellow;
+    var TOO_BIG, _calculateDrag, _circle, _rect, _vector, aqua, blue, colors, config, coral, gray, green, indigo, orange, purple, red, rose, violet, white, yellow;
 
     extend(DebugArcadePhysics, superClass);
 
@@ -32,13 +32,33 @@
       return game.plugins.add(this);
     };
 
-    DebugArcadePhysics.version = version = "0.1.0.1";
+    DebugArcadePhysics.exists = function(obj) {
+      return obj.exists;
+    };
 
-    TOO_BIG = 10000;
+    DebugArcadePhysics.isAlive = function(obj) {
+      return obj.alive;
+    };
+
+    DebugArcadePhysics.isBullet = function(obj) {
+      return obj instanceof Bullet;
+    };
+
+    DebugArcadePhysics.isParticle = function(obj) {
+      return obj.type === PARTICLE;
+    };
+
+    DebugArcadePhysics.isSprite = function(obj) {
+      return obj.type === SPRITE;
+    };
+
+    DebugArcadePhysics.VERSION = "0.2.0.21";
+
+    TOO_BIG = 9999;
 
     red = "hsla(0  , 100%,  50%, 0.5)";
 
-    rust = "hsla(15 , 100%,  50%, 0.5)";
+    coral = "hsla(15 , 100%,  50%, 0.5)";
 
     orange = "hsla(30 , 100%,  50%, 0.5)";
 
@@ -64,7 +84,7 @@
 
     DebugArcadePhysics.prototype.colors = colors = {
       acceleration: violet,
-      blocked: rust,
+      blocked: coral,
       body: yellow,
       bodyDisabled: gray,
       center: white,
@@ -86,7 +106,6 @@
       renderBodyDisabled: true,
       renderCenter: true,
       renderConfig: false,
-      renderDelta: false,
       renderDrag: true,
       renderMaxVelocity: true,
       renderLegend: true,
@@ -99,12 +118,19 @@
 
     DebugArcadePhysics.prototype.name = "Debug Arcade Physics Plugin";
 
-    DebugArcadePhysics.prototype.version = version;
+    Object.defineProperty(DebugArcadePhysics.prototype, "version", {
+      get: function() {
+        return this.constructor.VERSION;
+      }
+    });
 
-    DebugArcadePhysics.prototype.init = function() {
+    DebugArcadePhysics.prototype.init = function(settings) {
       console.log("%s v%s", this.name, this.version);
       this.game.debug.arcade = this["interface"]();
       this.help();
+      if (settings) {
+        this.configSet(settings);
+      }
     };
 
     DebugArcadePhysics.prototype.postRender = function() {
@@ -138,8 +164,13 @@
       })()];
     };
 
+    _calculateDrag = new Point;
+
     DebugArcadePhysics.prototype.calculateDrag = function(body, out) {
       var drag, dx, dy, physicsElapsed, velocity, vx, vy;
+      if (out == null) {
+        out = _calculateDrag;
+      }
       drag = body.drag, velocity = body.velocity;
       physicsElapsed = this.game.time.physicsElapsed;
       vx = velocity.x;
@@ -217,13 +248,8 @@
       return rect;
     };
 
-    _acceleration = new Line;
-
     DebugArcadePhysics.prototype.renderAcceleration = function(body) {
-      this.placeLine(_acceleration, body.center, body.acceleration);
-      if (!_acceleration.empty) {
-        this.geom(_acceleration, colors.acceleration);
-      }
+      this.renderVector(body.acceleration, body, colors.acceleration);
       return this;
     };
 
@@ -236,6 +262,17 @@
       var ref, x, y;
       ref = body.center, x = ref.x, y = ref.y;
       this.game.debug.pixel(~~x, ~~y, colors.center);
+      return this;
+    };
+
+    _circle = new Circle;
+
+    DebugArcadePhysics.prototype.renderCircle = function(radius, body, color) {
+      if (radius < 1) {
+        return this;
+      }
+      _circle.setTo(body.center.x, body.center.y, 2 * radius);
+      this.geom(_circle, color);
       return this;
     };
 
@@ -278,29 +315,18 @@
       return this;
     };
 
-    _dragVector = new Point;
-
-    _drag = new Line;
-
     DebugArcadePhysics.prototype.renderDrag = function(body) {
-      this.calculateDrag(body, _dragVector);
-      if (!_dragVector.isZero()) {
-        this.placeLine(_drag, body.center, _dragVector);
-        this.geom(_drag, colors.drag);
-      }
+      this.renderVector(this.calculateDrag(body), body, colors.drag);
       return this;
     };
-
-    _maxVelocity = new Rectangle;
 
     DebugArcadePhysics.prototype.renderMaxVelocity = function(body) {
       var maxVelocity;
       maxVelocity = body.maxVelocity;
-      if (maxVelocity.x >= TOO_BIG || maxVelocity.y >= TOO_BIG) {
+      if (maxVelocity.x > TOO_BIG || maxVelocity.y > TOO_BIG) {
         return this;
       }
-      this.placeRect(_maxVelocity, body.center, maxVelocity);
-      this.geom(_maxVelocity, colors.maxVelocity);
+      this.renderRect(maxVelocity, body, colors.maxVelocity);
       return this;
     };
 
@@ -334,9 +360,6 @@
         if (config.renderDrag) {
           this.renderDrag(body);
         }
-        if (config.renderDelta) {
-          this.renderDelta(body);
-        }
         if (config.renderCenter) {
           this.renderCenter(body);
         }
@@ -354,39 +377,38 @@
       return this;
     };
 
-    _delta = new Line;
+    _rect = new Rectangle;
 
-    DebugArcadePhysics.prototype.renderDelta = function(body) {
-      var x, y;
-      x = body._dx;
-      y = body._dy;
-      if ((0 === x && x === y)) {
+    DebugArcadePhysics.prototype.renderRect = function(vector, body, color) {
+      if (vector.isZero()) {
         return this;
       }
-      this.placeLineXY(_delta, body.center, x, y);
-      this.geom(_velocity, colors.delta, false);
+      this.placeRect(_rect, body.center, vector);
+      this.geom(_rect, color);
       return this;
     };
-
-    _speed = new Circle;
 
     DebugArcadePhysics.prototype.renderSpeed = function(body) {
       if (body.speed < 1) {
         return this;
       }
-      _speed.setTo(body.center.x, body.center.y, 2 * body.speed);
-      this.geom(_speed, colors.speed);
+      this.renderCircle(body.speed, body, colors.speed);
       return this;
     };
 
-    _velocity = new Line;
+    _vector = new Line;
 
-    DebugArcadePhysics.prototype.renderVelocity = function(body) {
-      if (body.velocity.isZero()) {
+    DebugArcadePhysics.prototype.renderVector = function(vector, body, color) {
+      if (vector.isZero()) {
         return this;
       }
-      this.placeLine(_velocity, body.center, body.velocity);
-      this.geom(_velocity, colors.velocity, false);
+      this.placeLine(_vector, body.center, vector);
+      this.geom(_vector, color, false);
+      return this;
+    };
+
+    DebugArcadePhysics.prototype.renderVelocity = function(body) {
+      this.renderVector(body.velocity, body, colors.velocity);
       return this;
     };
 
@@ -410,6 +432,7 @@
         acceleration: this.renderAcceleration.bind(this),
         body: this.renderBody.bind(this),
         center: this.renderCenter.bind(this),
+        circle: this.renderCircle.bind(this),
         config: this.config,
         configSet: this.configSet.bind(this),
         drag: this.renderDrag.bind(this),
@@ -420,8 +443,10 @@
         obj: this.renderObj.bind(this),
         off: this.off.bind(this),
         on: this.on.bind(this),
+        rect: this.renderRect.bind(this),
         show: this.show.bind(this),
         speed: this.renderSpeed.bind(this),
+        vector: this.renderVector.bind(this),
         velocity: this.renderVelocity.bind(this),
         toggle: this.toggle.bind(this)
       });
