@@ -20,9 +20,13 @@ game.debug.arcade.off()
 
 game.debug.arcade.renderObj( player );
 
+// Draw one property of one body
+
+game.debug.arcade.renderVelocity( player );
+
 // Optional: configure
 
-game.debug.arcade.configSet({
+game.debug.arcade.configSet({ // default values:
     filter:             null ,
     lineWidth:          1    ,
     on:                 true ,
@@ -32,7 +36,6 @@ game.debug.arcade.configSet({
     renderBodyDisabled: true ,
     renderCenter:       true ,
     renderConfig:       false,
-    renderDelta:        false,
     renderDrag:         true ,
     renderMaxVelocity:  true ,
     renderLegend:       true ,
@@ -41,15 +44,29 @@ game.debug.arcade.configSet({
     renderVelocity:     true
 }); // -> see console for values
 
+// Or configure during initialization:
+
+game.plugins.add(Phaser.Plugin.DebugArcadePhysics, {
+    on: true
+});
+
 // Example:
-// Keep automatic rendering 'on' and choose:
+// Keep automatic rendering 'on' but limit to certain objects:
 
 game.debug.arcade.configSet({
     filter: function (obj){
         return obj.name === "player";
-        // OR obj.parent.name === "asteroids"
-        // OR obj.type === Phaser.PARTICLE
-        // &c.
     }
+});
+
+// Some filters are included:
+// - isBullet
+// - isParticle
+// - isSprite
+
+// Example:
+
+game.debug.arcade.configSet({
+    filter: Phaser.Plugin.DebugArcadePhysics.isBullet
 });
 ```
