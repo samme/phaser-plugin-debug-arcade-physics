@@ -65,7 +65,7 @@ init = ->
 
   game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL
 
-  game.plugins.add(Phaser.Plugin.DebugArcadePhysics)
+  game.plugins.add Phaser.Plugin.DebugArcadePhysics
   return
 
 preload = ->
@@ -78,8 +78,6 @@ preload = ->
   return
 
 create = ->
-  #  We need arcade physics
-  game.physics.startSystem Phaser.Physics.ARCADE
 
   #  A spacey background
   space = game.world.space = game.add.tileSprite 0, 0, game.width, game.height, 'space'
@@ -176,10 +174,10 @@ render = ->
                    in(V)isible /
                    (F)reeze /
                    (S)tep 1 frame /
-                   (R)estart",
-                   10, 450, null, "12px Consolas, Menlo, monospace"
-  game.debug.text "v#{Phaser.Plugin.DebugArcadePhysics.version}",
-                   10, 470, null, "12px Consolas, Menlo, monospace"
+                   (R)estart •
+                   Plugin v#{Phaser.Plugin.DebugArcadePhysics.VERSION}
+                   Phaser v#{Phaser.VERSION}",
+                   10, 465, null, "12px Consolas, Menlo, monospace"
 
 toggleDim = ->
   onOrOff = not game.world.space.visible

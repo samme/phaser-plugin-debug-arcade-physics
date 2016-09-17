@@ -109,7 +109,6 @@
 
   create = function() {
     var fun, key, keyboard, ref2, space;
-    game.physics.startSystem(Phaser.Physics.ARCADE);
     space = game.world.space = game.add.tileSprite(0, 0, game.width, game.height, 'space');
     space.tilePosition.set(game.world.randomX, game.world.randomY);
     if (game.renderType === Phaser.WEBGL) {
@@ -215,8 +214,7 @@
   };
 
   render = function() {
-    game.debug.text("(T)oggle / (D)im / in(V)isible / (F)reeze / (S)tep 1 frame / (R)estart", 10, 450, null, "12px Consolas, Menlo, monospace");
-    return game.debug.text("v" + Phaser.Plugin.DebugArcadePhysics.version, 10, 470, null, "12px Consolas, Menlo, monospace");
+    return game.debug.text("(T)oggle / (D)im / in(V)isible / (F)reeze / (S)tep 1 frame / (R)estart • Plugin v" + Phaser.Plugin.DebugArcadePhysics.VERSION + " Phaser v" + Phaser.VERSION, 10, 465, null, "12px Consolas, Menlo, monospace");
   };
 
   toggleDim = function() {
