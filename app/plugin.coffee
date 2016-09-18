@@ -62,7 +62,6 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
     body:         yellow
     bodyDisabled: gray
     center:       white
-    delta:        indigo
     drag:         orange
     maxVelocity:  green
     speed:        blue
