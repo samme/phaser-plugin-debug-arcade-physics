@@ -152,7 +152,7 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
   geom: (obj, color, fill = no) ->
     {debug}   = @game
     {context} = debug
-    lineWidth = context
+    {lineWidth} = context
     context.lineWidth = @config.lineWidth
     debug.geom obj, color, fill
     context.lineWidth = lineWidth
