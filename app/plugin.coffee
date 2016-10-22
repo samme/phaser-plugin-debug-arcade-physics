@@ -43,6 +43,7 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
   red    = "hsla(0  , 100%,  50%, 0.5)"
   coral  = "hsla(15 , 100%,  50%, 0.5)"
   orange = "hsla(30 , 100%,  50%, 0.5)"
+  gold   = "hsla(45 , 100%,  50%, 0.5)"
   yellow = "hsla(60 , 100%,  50%, 0.5)"
   green  = "hsla(120, 100%,  50%, 0.5)"
   aqua   = "hsla(180, 100%,  50%, 0.5)"
@@ -64,6 +65,7 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
     center:       white
     drag:         orange
     maxVelocity:  green
+    offset:       gold
     speed:        blue
     touching:     red
     velocity:     aqua
@@ -81,6 +83,7 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
     renderDrag:         yes
     renderMaxVelocity:  yes
     renderLegend:       yes
+    renderOffset:       yes
     renderSpeed:        yes
     renderTouching:     yes
     renderVelocity:     yes
@@ -249,6 +252,7 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
       return this if filter and not filter(obj)
 
       @renderBody         body if config.renderBody
+      @renderOffset       body if config.renderOffset
       @renderSpeed        body if config.renderSpeed
       @renderMaxVelocity  body if config.renderMaxVelocity
       @renderVelocity     body if config.renderVelocity
@@ -262,6 +266,13 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
 
   renderBody: (body) ->
     @game.debug.body body.sprite, @bodyColor(body), no
+    this
+
+  _offset = new Line
+
+  renderOffset: (body) ->
+    @placeLineXY _offset, body.position, -body.offset.x * body.sprite.scale.x, -body.offset.y * body.sprite.scale.y
+    @geom _offset, colors.offset, no
     this
 
   _rect = new Rectangle
