@@ -1,6 +1,6 @@
 
 /*
-  Debug Arcade Physics plugin v0.3.1.1 for Phaser
+  Debug Arcade Physics plugin v0.3.2.1 for Phaser
  */
 
 (function() {
@@ -52,7 +52,7 @@
       return obj.type === SPRITE;
     };
 
-    DebugArcadePhysics.VERSION = "0.3.1.1";
+    DebugArcadePhysics.VERSION = "0.3.2.1";
 
     TOO_BIG = 9999;
 
@@ -206,7 +206,7 @@
       }
       debug = this.game.debug;
       context = debug.context;
-      lineWidth = context;
+      lineWidth = context.lineWidth;
       context.lineWidth = this.config.lineWidth;
       debug.geom(obj, color, fill);
       context.lineWidth = lineWidth;
