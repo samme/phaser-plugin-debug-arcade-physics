@@ -1,6 +1,6 @@
 
 /*
-  Debug Arcade Physics plugin v0.2.1.1 for Phaser
+  Debug Arcade Physics plugin v0.3.0.6 for Phaser
  */
 
 (function() {
@@ -20,7 +20,7 @@
   ARCADE = Phaser.Physics.ARCADE;
 
   Phaser.Plugin.DebugArcadePhysics = freeze(DebugArcadePhysics = (function(superClass) {
-    var TOO_BIG, _calculateDrag, _circle, _rect, _vector, aqua, blue, colors, config, coral, gray, green, indigo, orange, purple, red, rose, violet, white, yellow;
+    var TOO_BIG, _calculateDrag, _circle, _offset, _rect, _vector, aqua, blue, colors, config, coral, gold, gray, green, indigo, orange, purple, red, rose, violet, white, yellow;
 
     extend(DebugArcadePhysics, superClass);
 
@@ -52,7 +52,7 @@
       return obj.type === SPRITE;
     };
 
-    DebugArcadePhysics.VERSION = "0.2.1.1";
+    DebugArcadePhysics.VERSION = "0.3.0.6";
 
     TOO_BIG = 9999;
 
@@ -61,6 +61,8 @@
     coral = "hsla(15 , 100%,  50%, 0.5)";
 
     orange = "hsla(30 , 100%,  50%, 0.5)";
+
+    gold = "hsla(45 , 100%,  50%, 0.5)";
 
     yellow = "hsla(60 , 100%,  50%, 0.5)";
 
@@ -90,6 +92,7 @@
       center: white,
       drag: orange,
       maxVelocity: green,
+      offset: gold,
       speed: blue,
       touching: red,
       velocity: aqua
@@ -108,6 +111,7 @@
       renderDrag: true,
       renderMaxVelocity: true,
       renderLegend: true,
+      renderOffset: true,
       renderSpeed: true,
       renderTouching: true,
       renderVelocity: true
@@ -344,6 +348,9 @@
         if (config.renderBody) {
           this.renderBody(body);
         }
+        if (config.renderOffset) {
+          this.renderOffset(body);
+        }
         if (config.renderSpeed) {
           this.renderSpeed(body);
         }
@@ -373,6 +380,14 @@
 
     DebugArcadePhysics.prototype.renderBody = function(body) {
       this.game.debug.body(body.sprite, this.bodyColor(body), false);
+      return this;
+    };
+
+    _offset = new Line;
+
+    DebugArcadePhysics.prototype.renderOffset = function(body) {
+      this.placeLineXY(_offset, body.position, -body.offset.x * body.sprite.scale.x, -body.offset.y * body.sprite.scale.y);
+      this.geom(_offset, colors.offset, false);
       return this;
     };
 
