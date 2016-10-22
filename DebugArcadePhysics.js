@@ -1,6 +1,6 @@
 
 /*
-  Debug Arcade Physics plugin v0.3.0.6 for Phaser
+  Debug Arcade Physics plugin v0.3.1.1 for Phaser
  */
 
 (function() {
@@ -52,7 +52,7 @@
       return obj.type === SPRITE;
     };
 
-    DebugArcadePhysics.VERSION = "0.3.0.6";
+    DebugArcadePhysics.VERSION = "0.3.1.1";
 
     TOO_BIG = 9999;
 
@@ -92,7 +92,7 @@
       center: white,
       drag: orange,
       maxVelocity: green,
-      offset: gold,
+      offset: yellow,
       speed: blue,
       touching: red,
       velocity: aqua
