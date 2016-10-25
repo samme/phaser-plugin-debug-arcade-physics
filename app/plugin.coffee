@@ -4,11 +4,13 @@
 
 "use strict"
 
-{abs, max} = Math
+{abs, cos, max, sin} = Math
 {freeze, seal} = Object
 {Bullet, Circle, Line, PARTICLE, Plugin, Point, Rectangle, SPRITE} = Phaser
 {sign} = Phaser.Math
 {ARCADE} = Phaser.Physics
+
+degreeToRadiansFactor = Math.PI / 180
 
 Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phaser.Plugin
 
@@ -66,6 +68,7 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
     drag:         orange
     maxVelocity:  green
     offset:       yellow
+    rotation:     yellow
     speed:        blue
     touching:     red
     velocity:     aqua
@@ -84,6 +87,7 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
     renderMaxVelocity:  yes
     renderLegend:       yes
     renderOffset:       yes
+    renderRotation:     yes
     renderSpeed:        yes
     renderTouching:     yes
     renderVelocity:     yes
@@ -149,13 +153,13 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
         console.warn "No such setting '#{name}'. Valid names are #{@configKeys}."
     this
 
-  geom: (obj, color, fill = no) ->
+  geom: (obj, color, fill = no, lineWidth = @config.lineWidth) ->
     {debug}   = @game
     {context} = debug
-    {lineWidth} = context
-    context.lineWidth = @config.lineWidth
-    debug.geom obj, color, fill
+    savedLineWidth = context.lineWidth
     context.lineWidth = lineWidth
+    debug.geom obj, color, fill
+    context.lineWidth = savedLineWidth
     this
 
   help: ->
@@ -178,15 +182,21 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
     @config.on = yes
     this
 
-  placeLine: (line, start, vector) ->
-    line.setTo start.x, start.y, start.x + vector.x, start.y + vector.y
+  placeLine: (line, start, end) ->
+    @placeLineXY line, start.x, start.y, end.x, end.y
 
-  placeLineXY: (line, start, vectorX, vectorY) ->
-    line.setTo start.x, start.y, start.x + vectorX, start.y + vectorY
+  placeLineXY: (line, startX, startY, endX, endY) ->
+    line.setTo startX, startY, endX, endY
 
   placeRect: (rect, center, size) ->
     rect.resize(2 * size.x, 2 * size.y).centerOn(center.x, center.y)
     rect
+
+  placeVector: (line, start, vector) ->
+    @placeVectorXY line, start.x, start.y, vector.x, vector.y
+
+  placeVectorXY: (line, startX, startY, vectorX, vectorY) ->
+    line.setTo startX, startY, startX + vectorX, startY + vectorY
 
   renderAcceleration: (body) ->
     @renderVector body.acceleration, body, colors.acceleration
@@ -253,6 +263,7 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
 
       @renderBody         body if config.renderBody
       @renderOffset       body if config.renderOffset
+      @renderRotation     body if config.renderRotation
       @renderSpeed        body if config.renderSpeed
       @renderMaxVelocity  body if config.renderMaxVelocity
       @renderVelocity     body if config.renderVelocity
@@ -268,10 +279,20 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
     @game.debug.body body.sprite, @bodyColor(body), no
     this
 
+  _line = new Line
+
+  renderLine: (startX, startY, endX, endY, color, width) ->
+    _line.set startX, startY, endX, endY
+    @geom _line, color, no, width
+    this
+
   _offset = new Line
 
   renderOffset: (body) ->
-    @placeLineXY _offset, body.position, -body.offset.x * body.sprite.scale.x, -body.offset.y * body.sprite.scale.y
+    @placeVectorXY _offset, body.position.x,
+                            body.position.y,
+                            -body.offset.x * body.sprite.scale.x,
+                            -body.offset.y * body.sprite.scale.y
     @geom _offset, colors.offset, no
     this
 
@@ -283,6 +304,19 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
     @geom _rect, color
     this
 
+  _rotation = new Line
+
+  renderRotation: (body) ->
+    {halfHeight, halfWidth, rotation} = body
+    {x, y} = body.center
+    rotation *= degreeToRadiansFactor
+    _rotation.setTo x,
+                y,
+                x + halfWidth  * cos(rotation),
+                y + halfHeight * sin(rotation)
+    @geom _rotation, colors.rotation
+    this
+
   renderSpeed: (body) ->
     return this if body.speed < 1
     @renderCircle body.speed, body, colors.speed
@@ -292,7 +326,7 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
 
   renderVector: (vector, body, color) ->
     return this if vector.isZero()
-    @placeLine _vector, body.center, vector
+    @placeVector _vector, body.center, vector
     @geom _vector, color, no
     this
 
