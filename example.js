@@ -95,7 +95,9 @@
     game.renderer.clearBeforeRender = false;
     game.renderer.roundPixels = true;
     game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-    game.plugins.add(Phaser.Plugin.DebugArcadePhysics);
+    if (!game.debug.arcade) {
+      game.plugins.add(Phaser.Plugin.DebugArcadePhysics);
+    }
   };
 
   preload = function() {
@@ -214,7 +216,7 @@
   };
 
   render = function() {
-    return game.debug.text("(T)oggle / (D)im / in(V)isible / (F)reeze / (S)tep 1 frame / (R)estart • Plugin v" + Phaser.Plugin.DebugArcadePhysics.VERSION + " Phaser v" + Phaser.VERSION, 10, 465, null, "12px Consolas, Menlo, monospace");
+    return game.debug.text("(T)oggle / (D)im / in(V)isible / (F)reeze / (S)tep 1 frame / (R)estart • Plugin v" + Phaser.Plugin.DebugArcadePhysics.VERSION + " • Phaser v" + Phaser.VERSION, 10, 465, null, "12px Consolas, Menlo, monospace");
   };
 
   toggleDim = function() {
