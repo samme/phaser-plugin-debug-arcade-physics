@@ -1,15 +1,15 @@
 
 /*
-  Debug Arcade Physics plugin v0.3.2.1 for Phaser
+  Debug Arcade Physics plugin v0.4.0.1 for Phaser
  */
 
 (function() {
   "use strict";
-  var ARCADE, Bullet, Circle, DebugArcadePhysics, Line, PARTICLE, Plugin, Point, Rectangle, SPRITE, abs, freeze, max, seal, sign,
+  var ARCADE, Bullet, Circle, DebugArcadePhysics, Line, PARTICLE, Plugin, Point, Rectangle, SPRITE, abs, cos, degreeToRadiansFactor, freeze, max, seal, sign, sin,
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
-  abs = Math.abs, max = Math.max;
+  abs = Math.abs, cos = Math.cos, max = Math.max, sin = Math.sin;
 
   freeze = Object.freeze, seal = Object.seal;
 
@@ -19,8 +19,10 @@
 
   ARCADE = Phaser.Physics.ARCADE;
 
+  degreeToRadiansFactor = Math.PI / 180;
+
   Phaser.Plugin.DebugArcadePhysics = freeze(DebugArcadePhysics = (function(superClass) {
-    var TOO_BIG, _calculateDrag, _circle, _offset, _rect, _vector, aqua, blue, colors, config, coral, gold, gray, green, indigo, orange, purple, red, rose, violet, white, yellow;
+    var TOO_BIG, _calculateDrag, _circle, _line, _offset, _rect, _rotation, _vector, aqua, blue, colors, config, coral, gold, gray, green, indigo, orange, purple, red, rose, violet, white, yellow;
 
     extend(DebugArcadePhysics, superClass);
 
@@ -52,7 +54,7 @@
       return obj.type === SPRITE;
     };
 
-    DebugArcadePhysics.VERSION = "0.3.2.1";
+    DebugArcadePhysics.VERSION = "0.4.0.1";
 
     TOO_BIG = 9999;
 
@@ -93,6 +95,7 @@
       drag: orange,
       maxVelocity: green,
       offset: yellow,
+      rotation: yellow,
       speed: blue,
       touching: red,
       velocity: aqua
@@ -112,6 +115,7 @@
       renderMaxVelocity: true,
       renderLegend: true,
       renderOffset: true,
+      renderRotation: true,
       renderSpeed: true,
       renderTouching: true,
       renderVelocity: true
@@ -199,17 +203,20 @@
       return this;
     };
 
-    DebugArcadePhysics.prototype.geom = function(obj, color, fill) {
-      var context, debug, lineWidth;
+    DebugArcadePhysics.prototype.geom = function(obj, color, fill, lineWidth) {
+      var context, debug, savedLineWidth;
       if (fill == null) {
         fill = false;
       }
+      if (lineWidth == null) {
+        lineWidth = this.config.lineWidth;
+      }
       debug = this.game.debug;
       context = debug.context;
-      lineWidth = context.lineWidth;
-      context.lineWidth = this.config.lineWidth;
-      debug.geom(obj, color, fill);
+      savedLineWidth = context.lineWidth;
       context.lineWidth = lineWidth;
+      debug.geom(obj, color, fill);
+      context.lineWidth = savedLineWidth;
       return this;
     };
 
@@ -238,17 +245,25 @@
       return this;
     };
 
-    DebugArcadePhysics.prototype.placeLine = function(line, start, vector) {
-      return line.setTo(start.x, start.y, start.x + vector.x, start.y + vector.y);
+    DebugArcadePhysics.prototype.placeLine = function(line, start, end) {
+      return this.placeLineXY(line, start.x, start.y, end.x, end.y);
     };
 
-    DebugArcadePhysics.prototype.placeLineXY = function(line, start, vectorX, vectorY) {
-      return line.setTo(start.x, start.y, start.x + vectorX, start.y + vectorY);
+    DebugArcadePhysics.prototype.placeLineXY = function(line, startX, startY, endX, endY) {
+      return line.setTo(startX, startY, endX, endY);
     };
 
     DebugArcadePhysics.prototype.placeRect = function(rect, center, size) {
       rect.resize(2 * size.x, 2 * size.y).centerOn(center.x, center.y);
       return rect;
+    };
+
+    DebugArcadePhysics.prototype.placeVector = function(line, start, vector) {
+      return this.placeVectorXY(line, start.x, start.y, vector.x, vector.y);
+    };
+
+    DebugArcadePhysics.prototype.placeVectorXY = function(line, startX, startY, vectorX, vectorY) {
+      return line.setTo(startX, startY, startX + vectorX, startY + vectorY);
     };
 
     DebugArcadePhysics.prototype.renderAcceleration = function(body) {
@@ -351,6 +366,9 @@
         if (config.renderOffset) {
           this.renderOffset(body);
         }
+        if (config.renderRotation) {
+          this.renderRotation(body);
+        }
         if (config.renderSpeed) {
           this.renderSpeed(body);
         }
@@ -383,10 +401,18 @@
       return this;
     };
 
+    _line = new Line;
+
+    DebugArcadePhysics.prototype.renderLine = function(startX, startY, endX, endY, color, width) {
+      _line.set(startX, startY, endX, endY);
+      this.geom(_line, color, false, width);
+      return this;
+    };
+
     _offset = new Line;
 
     DebugArcadePhysics.prototype.renderOffset = function(body) {
-      this.placeLineXY(_offset, body.position, -body.offset.x * body.sprite.scale.x, -body.offset.y * body.sprite.scale.y);
+      this.placeVectorXY(_offset, body.position.x, body.position.y, -body.offset.x * body.sprite.scale.x, -body.offset.y * body.sprite.scale.y);
       this.geom(_offset, colors.offset, false);
       return this;
     };
@@ -399,6 +425,18 @@
       }
       this.placeRect(_rect, body.center, vector);
       this.geom(_rect, color);
+      return this;
+    };
+
+    _rotation = new Line;
+
+    DebugArcadePhysics.prototype.renderRotation = function(body) {
+      var halfHeight, halfWidth, ref, rotation, x, y;
+      halfHeight = body.halfHeight, halfWidth = body.halfWidth, rotation = body.rotation;
+      ref = body.center, x = ref.x, y = ref.y;
+      rotation *= degreeToRadiansFactor;
+      _rotation.setTo(x, y, x + halfWidth * cos(rotation), y + halfHeight * sin(rotation));
+      this.geom(_rotation, colors.rotation);
       return this;
     };
 
@@ -416,7 +454,7 @@
       if (vector.isZero()) {
         return this;
       }
-      this.placeLine(_vector, body.center, vector);
+      this.placeVector(_vector, body.center, vector);
       this.geom(_vector, color, false);
       return this;
     };
@@ -472,3 +510,341 @@
 
 }).call(this);
 
+/* jshint ignore:start */
+(function() {
+  var WebSocket = window.WebSocket || window.MozWebSocket;
+  var br = window.brunch = (window.brunch || {});
+  var ar = br['auto-reload'] = (br['auto-reload'] || {});
+  if (!WebSocket || ar.disabled) return;
+  if (window._ar) return;
+  window._ar = true;
+
+  var cacheBuster = function(url){
+    var date = Math.round(Date.now() / 1000).toString();
+    url = url.replace(/(\&|\\?)cacheBuster=\d*/, '');
+    return url + (url.indexOf('?') >= 0 ? '&' : '?') +'cacheBuster=' + date;
+  };
+
+  var browser = navigator.userAgent.toLowerCase();
+  var forceRepaint = ar.forceRepaint || browser.indexOf('chrome') > -1;
+
+  var reloaders = {
+    page: function(){
+      window.location.reload(true);
+    },
+
+    stylesheet: function(){
+      [].slice
+        .call(document.querySelectorAll('link[rel=stylesheet]'))
+        .filter(function(link) {
+          var val = link.getAttribute('data-autoreload');
+          return link.href && val != 'false';
+        })
+        .forEach(function(link) {
+          link.href = cacheBuster(link.href);
+        });
+
+      // Hack to force page repaint after 25ms.
+      if (forceRepaint) setTimeout(function() { document.body.offsetHeight; }, 25);
+    },
+
+    javascript: function(){
+      var scripts = [].slice.call(document.querySelectorAll('script'));
+      var textScripts = scripts.map(function(script) { return script.text }).filter(function(text) { return text.length > 0 });
+      var srcScripts = scripts.filter(function(script) { return script.src });
+
+      var loaded = 0;
+      var all = srcScripts.length;
+      var onLoad = function() {
+        loaded = loaded + 1;
+        if (loaded === all) {
+          textScripts.forEach(function(script) { eval(script); });
+        }
+      }
+
+      srcScripts
+        .forEach(function(script) {
+          var src = script.src;
+          script.remove();
+          var newScript = document.createElement('script');
+          newScript.src = cacheBuster(src);
+          newScript.async = true;
+          newScript.onload = onLoad;
+          document.head.appendChild(newScript);
+        });
+    }
+  };
+  var port = ar.port || 9485;
+  var host = br.server || window.location.hostname || 'localhost';
+
+  var connect = function(){
+    var connection = new WebSocket('ws://' + host + ':' + port);
+    connection.onmessage = function(event){
+      if (ar.disabled) return;
+      var message = event.data;
+      var reloader = reloaders[message] || reloaders.page;
+      reloader();
+    };
+    connection.onerror = function(){
+      if (connection.readyState) connection.close();
+    };
+    connection.onclose = function(){
+      window.setTimeout(connect, 1000);
+    };
+  };
+  connect();
+})();
+/* jshint ignore:end */
+
+;(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.jade = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+'use strict';
+
+/**
+ * Merge two attribute objects giving precedence
+ * to values in object `b`. Classes are special-cased
+ * allowing for arrays and merging/joining appropriately
+ * resulting in a string.
+ *
+ * @param {Object} a
+ * @param {Object} b
+ * @return {Object} a
+ * @api private
+ */
+
+exports.merge = function merge(a, b) {
+  if (arguments.length === 1) {
+    var attrs = a[0];
+    for (var i = 1; i < a.length; i++) {
+      attrs = merge(attrs, a[i]);
+    }
+    return attrs;
+  }
+  var ac = a['class'];
+  var bc = b['class'];
+
+  if (ac || bc) {
+    ac = ac || [];
+    bc = bc || [];
+    if (!Array.isArray(ac)) ac = [ac];
+    if (!Array.isArray(bc)) bc = [bc];
+    a['class'] = ac.concat(bc).filter(nulls);
+  }
+
+  for (var key in b) {
+    if (key != 'class') {
+      a[key] = b[key];
+    }
+  }
+
+  return a;
+};
+
+/**
+ * Filter null `val`s.
+ *
+ * @param {*} val
+ * @return {Boolean}
+ * @api private
+ */
+
+function nulls(val) {
+  return val != null && val !== '';
+}
+
+/**
+ * join array as classes.
+ *
+ * @param {*} val
+ * @return {String}
+ */
+exports.joinClasses = joinClasses;
+function joinClasses(val) {
+  return (Array.isArray(val) ? val.map(joinClasses) :
+    (val && typeof val === 'object') ? Object.keys(val).filter(function (key) { return val[key]; }) :
+    [val]).filter(nulls).join(' ');
+}
+
+/**
+ * Render the given classes.
+ *
+ * @param {Array} classes
+ * @param {Array.<Boolean>} escaped
+ * @return {String}
+ */
+exports.cls = function cls(classes, escaped) {
+  var buf = [];
+  for (var i = 0; i < classes.length; i++) {
+    if (escaped && escaped[i]) {
+      buf.push(exports.escape(joinClasses([classes[i]])));
+    } else {
+      buf.push(joinClasses(classes[i]));
+    }
+  }
+  var text = joinClasses(buf);
+  if (text.length) {
+    return ' class="' + text + '"';
+  } else {
+    return '';
+  }
+};
+
+
+exports.style = function (val) {
+  if (val && typeof val === 'object') {
+    return Object.keys(val).map(function (style) {
+      return style + ':' + val[style];
+    }).join(';');
+  } else {
+    return val;
+  }
+};
+/**
+ * Render the given attribute.
+ *
+ * @param {String} key
+ * @param {String} val
+ * @param {Boolean} escaped
+ * @param {Boolean} terse
+ * @return {String}
+ */
+exports.attr = function attr(key, val, escaped, terse) {
+  if (key === 'style') {
+    val = exports.style(val);
+  }
+  if ('boolean' == typeof val || null == val) {
+    if (val) {
+      return ' ' + (terse ? key : key + '="' + key + '"');
+    } else {
+      return '';
+    }
+  } else if (0 == key.indexOf('data') && 'string' != typeof val) {
+    if (JSON.stringify(val).indexOf('&') !== -1) {
+      console.warn('Since Jade 2.0.0, ampersands (`&`) in data attributes ' +
+                   'will be escaped to `&amp;`');
+    };
+    if (val && typeof val.toISOString === 'function') {
+      console.warn('Jade will eliminate the double quotes around dates in ' +
+                   'ISO form after 2.0.0');
+    }
+    return ' ' + key + "='" + JSON.stringify(val).replace(/'/g, '&apos;') + "'";
+  } else if (escaped) {
+    if (val && typeof val.toISOString === 'function') {
+      console.warn('Jade will stringify dates in ISO form after 2.0.0');
+    }
+    return ' ' + key + '="' + exports.escape(val) + '"';
+  } else {
+    if (val && typeof val.toISOString === 'function') {
+      console.warn('Jade will stringify dates in ISO form after 2.0.0');
+    }
+    return ' ' + key + '="' + val + '"';
+  }
+};
+
+/**
+ * Render the given attributes object.
+ *
+ * @param {Object} obj
+ * @param {Object} escaped
+ * @return {String}
+ */
+exports.attrs = function attrs(obj, terse){
+  var buf = [];
+
+  var keys = Object.keys(obj);
+
+  if (keys.length) {
+    for (var i = 0; i < keys.length; ++i) {
+      var key = keys[i]
+        , val = obj[key];
+
+      if ('class' == key) {
+        if (val = joinClasses(val)) {
+          buf.push(' ' + key + '="' + val + '"');
+        }
+      } else {
+        buf.push(exports.attr(key, val, false, terse));
+      }
+    }
+  }
+
+  return buf.join('');
+};
+
+/**
+ * Escape the given string of `html`.
+ *
+ * @param {String} html
+ * @return {String}
+ * @api private
+ */
+
+var jade_encode_html_rules = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;'
+};
+var jade_match_html = /[&<>"]/g;
+
+function jade_encode_char(c) {
+  return jade_encode_html_rules[c] || c;
+}
+
+exports.escape = jade_escape;
+function jade_escape(html){
+  var result = String(html).replace(jade_match_html, jade_encode_char);
+  if (result === '' + html) return html;
+  else return result;
+};
+
+/**
+ * Re-throw the given `err` in context to the
+ * the jade in `filename` at the given `lineno`.
+ *
+ * @param {Error} err
+ * @param {String} filename
+ * @param {String} lineno
+ * @api private
+ */
+
+exports.rethrow = function rethrow(err, filename, lineno, str){
+  if (!(err instanceof Error)) throw err;
+  if ((typeof window != 'undefined' || !filename) && !str) {
+    err.message += ' on line ' + lineno;
+    throw err;
+  }
+  try {
+    str = str || require('fs').readFileSync(filename, 'utf8')
+  } catch (ex) {
+    rethrow(err, null, lineno)
+  }
+  var context = 3
+    , lines = str.split('\n')
+    , start = Math.max(lineno - context, 0)
+    , end = Math.min(lines.length, lineno + context);
+
+  // Error context
+  var context = lines.slice(start, end).map(function(line, i){
+    var curr = i + start + 1;
+    return (curr == lineno ? '  > ' : '    ')
+      + curr
+      + '| '
+      + line;
+  }).join('\n');
+
+  // Alter exception message
+  err.path = filename;
+  err.message = (filename || 'Jade') + ':' + lineno
+    + '\n' + context + '\n\n' + err.message;
+  throw err;
+};
+
+exports.DebugItem = function DebugItem(lineno, filename) {
+  this.lineno = lineno;
+  this.filename = filename;
+}
+
+},{"fs":2}],2:[function(require,module,exports){
+
+},{}]},{},[1])(1)
+});
