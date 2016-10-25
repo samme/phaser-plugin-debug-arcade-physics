@@ -65,7 +65,8 @@ init = ->
 
   game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL
 
-  game.plugins.add Phaser.Plugin.DebugArcadePhysics
+  unless game.debug.arcade
+    game.plugins.add Phaser.Plugin.DebugArcadePhysics
   return
 
 preload = ->
@@ -175,7 +176,7 @@ render = ->
                    (F)reeze /
                    (S)tep 1 frame /
                    (R)estart •
-                   Plugin v#{Phaser.Plugin.DebugArcadePhysics.VERSION}
+                   Plugin v#{Phaser.Plugin.DebugArcadePhysics.VERSION} •
                    Phaser v#{Phaser.VERSION}",
                    10, 465, null, "12px Consolas, Menlo, monospace"
 
