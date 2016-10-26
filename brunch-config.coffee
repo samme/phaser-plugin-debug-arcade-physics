@@ -12,13 +12,13 @@ module.exports =
   overrides:
     production:
       optimize: no
-      plugins:
-        off: ["jaded-brunch"]
   paths:
     public: 'dist'
   plugins:
     coffeescript:
       bare: no
+    jade:
+      runtimeFiles: no
     version:
       fileRegExp: /\.(js|html)$/
   sourceMaps: no
