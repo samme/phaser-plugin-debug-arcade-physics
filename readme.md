@@ -39,6 +39,8 @@ game.debug.arcade.configSet({ // default values:
     renderDrag:         true ,
     renderMaxVelocity:  true ,
     renderLegend:       true ,
+    renderOffset:       true ,
+    renderRotation:     true ,
     renderSpeed:        true ,
     renderTouching:     true ,
     renderVelocity:     true
