@@ -4,15 +4,15 @@
   "homepage": "https://github.com/samme/phaser-plugin-debug-arcade-physics/",
   "bugs": "https://github.com/samme/phaser-plugin-debug-arcade-physics/issues",
   "author": "samme",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/samme/phaser-plugin-debug-arcade-physics.git"
   },
   "scripts": {
-    "start":  "brunch watch --server",
-    "build":  "brunch build --production",
+    "start": "brunch watch --server",
+    "build": "brunch build --production",
     "deploy": "git push origin master && git subtree push --prefix dist origin gh-pages"
   },
   "dependencies": {
@@ -20,9 +20,8 @@
   },
   "devDependencies": {
     "auto-reload-brunch": "^2.0.0",
-    "coffee-script-brunch": "^2.0.0",
+    "coffee-script-brunch": "^2.1.0",
     "coffeelint-brunch": "^2.0.0",
-    "jaded-brunch": "^2.3.0",
     "javascript-brunch": "^2.0.0",
     "jstransformer-coffee-script": "^1.0.0",
     "jstransformer-markdown": "^1.1.0",
