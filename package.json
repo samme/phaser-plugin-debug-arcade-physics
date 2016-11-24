@@ -16,7 +16,7 @@
     "deploy": "git push origin master && git subtree push --prefix dist origin gh-pages"
   },
   "dependencies": {
-    "phaser": "*"
+    "phaser": "^2.6.2"
   },
   "devDependencies": {
     "auto-reload-brunch": "^2.0.0",
