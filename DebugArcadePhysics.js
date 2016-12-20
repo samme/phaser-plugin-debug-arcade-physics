@@ -1,6 +1,6 @@
 
 /*
-  Debug Arcade Physics plugin v0.4.2.1 for Phaser
+  Debug Arcade Physics plugin v0.5.0 (1) for Phaser
  */
 
 (function() {
@@ -22,7 +22,7 @@
   degreeToRadiansFactor = Math.PI / 180;
 
   Phaser.Plugin.DebugArcadePhysics = freeze(DebugArcadePhysics = (function(superClass) {
-    var TOO_BIG, _calculateDrag, _circle, _line, _offset, _rect, _rotation, _vector, aqua, blue, colors, config, coral, gold, gray, green, indigo, orange, purple, red, rose, violet, white, yellow;
+    var TOO_BIG, _calculateDrag, _circle, _line, _offset, _rect, _rotation, aqua, blue, colors, coral, gold, gray, green, indigo, orange, purple, red, rose, violet, white, yellow;
 
     extend(DebugArcadePhysics, superClass);
 
@@ -46,6 +46,18 @@
       return obj instanceof Bullet;
     };
 
+    DebugArcadePhysics.isNotBullet = function(obj) {
+      return !obj instanceof Bullet;
+    };
+
+    DebugArcadePhysics.isNotParticle = function(obj) {
+      return obj.type !== PARTICLE;
+    };
+
+    DebugArcadePhysics.isNotSprite = function(obj) {
+      return obj.type !== SPRITE;
+    };
+
     DebugArcadePhysics.isParticle = function(obj) {
       return obj.type === PARTICLE;
     };
@@ -54,7 +66,7 @@
       return obj.type === SPRITE;
     };
 
-    DebugArcadePhysics.VERSION = "0.4.2.1";
+    DebugArcadePhysics.VERSION = "0.5.0.1";
 
     TOO_BIG = 9999;
 
@@ -101,7 +113,7 @@
       velocity: aqua
     };
 
-    DebugArcadePhysics.prototype.config = config = seal({
+    DebugArcadePhysics.prototype.config = seal({
       filter: null,
       lineWidth: 1,
       on: true,
@@ -121,7 +133,7 @@
       renderVelocity: true
     });
 
-    DebugArcadePhysics.prototype.configKeys = freeze(Object.keys(config));
+    DebugArcadePhysics.prototype.configKeys = freeze(Object.keys(DebugArcadePhysics.prototype.config));
 
     DebugArcadePhysics.prototype.name = "Debug Arcade Physics Plugin";
 
@@ -157,18 +169,7 @@
       var blocked, enable, ref, renderBlocked, renderBodyDisabled, renderTouching, touching;
       ref = this.config, renderBlocked = ref.renderBlocked, renderBodyDisabled = ref.renderBodyDisabled, renderTouching = ref.renderTouching;
       blocked = body.blocked, enable = body.enable, touching = body.touching;
-      return colors[(function() {
-        switch (false) {
-          case !(renderBodyDisabled && !enable):
-            return "bodyDisabled";
-          case !(renderTouching && !touching.none):
-            return "touching";
-          case !(renderBlocked && (blocked.down || blocked.up || blocked.left || blocked.right)):
-            return "blocked";
-          default:
-            return "body";
-        }
-      })()];
+      return colors[renderBodyDisabled && !enable ? "bodyDisabled" : renderTouching && !touching.none ? "touching" : renderBlocked && (blocked.down || blocked.up || blocked.left || blocked.right) ? "blocked" : "body"];
     };
 
     _calculateDrag = new Point;
@@ -197,7 +198,7 @@
           this.config[name] = val;
           console.log(name, val);
         } else {
-          console.warn("No such setting '" + name + "'. Valid names are " + this.configKeys + ".");
+          console.warn("No such setting '" + name + "'. Use " + (this.configKeys.join(', ')) + ".");
         }
       }
       return this;
@@ -277,9 +278,10 @@
     };
 
     DebugArcadePhysics.prototype.renderCenter = function(body) {
-      var ref, x, y;
+      var camera, ref, x, y;
       ref = body.center, x = ref.x, y = ref.y;
-      this.game.debug.pixel(~~x, ~~y, colors.center);
+      camera = this.game.camera;
+      this.game.debug.pixel(~~(x - camera.x), ~~(y - camera.y), colors.center);
       return this;
     };
 
@@ -297,10 +299,10 @@
     DebugArcadePhysics.prototype.renderColors = function(x, y) {
       var debug, name, ref, val;
       if (x == null) {
-        x = this.game.debug.lineHeight;
+        x = 10;
       }
       if (y == null) {
-        y = this.game.debug.lineHeight;
+        y = x;
       }
       debug = this.game.debug;
       debug.start(x, y);
@@ -317,10 +319,10 @@
     DebugArcadePhysics.prototype.renderConfig = function(x, y) {
       var debug, name, ref, val;
       if (x == null) {
-        x = this.game.debug.lineHeight;
+        x = 10;
       }
       if (y == null) {
-        y = this.game.debug.lineHeight;
+        y = x;
       }
       debug = this.game.debug;
       debug.start(x, y);
@@ -349,7 +351,7 @@
     };
 
     DebugArcadePhysics.prototype.renderObj = function(obj) {
-      var body, child, filter, i, len, ref;
+      var body, child, config, filter, i, len, ref;
       if (!obj.exists) {
         return this;
       }
@@ -404,7 +406,7 @@
     _line = new Line;
 
     DebugArcadePhysics.prototype.renderLine = function(startX, startY, endX, endY, color, width) {
-      _line.set(startX, startY, endX, endY);
+      _line.setTo(startX, startY, endX, endY);
       this.geom(_line, color, false, width);
       return this;
     };
@@ -435,8 +437,7 @@
       halfHeight = body.halfHeight, halfWidth = body.halfWidth, rotation = body.rotation;
       ref = body.center, x = ref.x, y = ref.y;
       rotation *= degreeToRadiansFactor;
-      _rotation.setTo(x, y, x + halfWidth * cos(rotation), y + halfHeight * sin(rotation));
-      this.geom(_rotation, colors.rotation);
+      this.renderVectorXY(halfWidth * cos(rotation), halfHeight * sin(rotation), body, colors.rotation);
       return this;
     };
 
@@ -448,14 +449,21 @@
       return this;
     };
 
-    _vector = new Line;
-
     DebugArcadePhysics.prototype.renderVector = function(vector, body, color) {
       if (vector.isZero()) {
         return this;
       }
-      this.placeVector(_vector, body.center, vector);
-      this.geom(_vector, color, false);
+      this.renderVectorXY(vector.x, vector.y, body, color);
+      return this;
+    };
+
+    DebugArcadePhysics.prototype.renderVectorXY = function(vectorX, vectorY, body, color) {
+      var ref, x, y;
+      if (vectorX === 0 && vectorY === 0) {
+        return this;
+      }
+      ref = body.center, x = ref.x, y = ref.y;
+      this.renderLine(x, y, x + vectorX, y + vectorY, color);
       return this;
     };
 
@@ -494,11 +502,14 @@
         maxVelocity: this.renderMaxVelocity.bind(this),
         obj: this.renderObj.bind(this),
         off: this.off.bind(this),
+        offset: this.renderOffset.bind(this),
         on: this.on.bind(this),
         rect: this.renderRect.bind(this),
+        rotation: this.renderRotation.bind(this),
         show: this.show.bind(this),
         speed: this.renderSpeed.bind(this),
         vector: this.renderVector.bind(this),
+        vectorXY: this.renderVectorXY.bind(this),
         velocity: this.renderVelocity.bind(this),
         toggle: this.toggle.bind(this)
       });
