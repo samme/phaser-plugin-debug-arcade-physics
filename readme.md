@@ -62,7 +62,12 @@ game.debug.arcade.configSet({
 });
 
 // Some filters are included:
+// - exists
+// - isAlive
 // - isBullet
+// - isNotBullet
+// - isNotParticle
+// - isNotSprite
 // - isParticle
 // - isSprite
 
