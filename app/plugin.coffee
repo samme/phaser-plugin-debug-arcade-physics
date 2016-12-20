@@ -1,5 +1,5 @@
 ###
-  Debug Arcade Physics plugin v{!major!}.{!minor!}.{!maintenance!}.{!build!} for Phaser
+  Debug Arcade Physics plugin v{!major!}.{!minor!}.{!maintenance!} ({!build!}) for Phaser
 ###
 
 "use strict"
@@ -29,6 +29,15 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
 
   @isBullet = (obj) ->
     obj instanceof Bullet
+
+  @isNotBullet = (obj) ->
+    not obj instanceof Bullet
+
+  @isNotParticle = (obj) ->
+    obj.type isnt PARTICLE
+
+  @isNotSprite = (obj) ->
+    obj.type isnt SPRITE
 
   @isParticle = (obj) ->
     obj.type is PARTICLE
@@ -73,7 +82,7 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
     touching:     red
     velocity:     aqua
 
-  config: config = seal
+  config: seal
     filter:             null
     lineWidth:          1
     on:                 yes
@@ -92,7 +101,7 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
     renderTouching:     yes
     renderVelocity:     yes
 
-  configKeys: freeze Object.keys(config)
+  configKeys: freeze Object.keys this::config
 
   name: "Debug Arcade Physics Plugin"
 
@@ -121,14 +130,13 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
   bodyColor: (body) ->
     {renderBlocked, renderBodyDisabled, renderTouching} = @config
     {blocked, enable, touching} = body
-    colors[ switch
-      when renderBodyDisabled and not enable        then "bodyDisabled"
-      when renderTouching     and not touching.none then "touching"
-      when renderBlocked      and (blocked.down     or
-                                   blocked.up       or
-                                   blocked.left     or
-                                   blocked.right)   then "blocked"
-      else                                               "body"
+    colors[ if renderBodyDisabled and not enable        then "bodyDisabled"
+    else    if renderTouching     and not touching.none then "touching"
+    else    if renderBlocked      and (blocked.down     or
+                                       blocked.up       or
+                                       blocked.left     or
+                                       blocked.right)   then "blocked"
+    else                                                     "body"
     ]
 
   _calculateDrag = new Point
@@ -150,7 +158,7 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
         @config[name] = val
         console.log name, val
       else
-        console.warn "No such setting '#{name}'. Valid names are #{@configKeys}."
+        console.warn "No such setting '#{name}'. Use #{@configKeys.join ', '}."
     this
 
   geom: (obj, color, fill = no, lineWidth = @config.lineWidth) ->
@@ -208,7 +216,8 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
 
   renderCenter: (body) ->
     {x, y} = body.center
-    @game.debug.pixel ~~x, ~~y, colors.center
+    {camera} = @game
+    @game.debug.pixel ~~(x - camera.x), ~~(y - camera.y), colors.center
     this
 
   _circle = new Circle
@@ -219,7 +228,7 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
     @geom _circle, color
     this
 
-  renderColors: (x = @game.debug.lineHeight, y = @game.debug.lineHeight) ->
+  renderColors: (x = 10, y = x) ->
     {debug} = @game
     debug.start x, y
     for name, val of @colors
@@ -228,7 +237,7 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
     debug.stop()
     this
 
-  renderConfig: (x = @game.debug.lineHeight, y = @game.debug.lineHeight) ->
+  renderConfig: (x = 10, y = x) ->
     {debug} = @game
     debug.start x, y
     for name, val of @config
@@ -282,7 +291,7 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
   _line = new Line
 
   renderLine: (startX, startY, endX, endY, color, width) ->
-    _line.set startX, startY, endX, endY
+    _line.setTo startX, startY, endX, endY
     @geom _line, color, no, width
     this
 
@@ -310,11 +319,9 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
     {halfHeight, halfWidth, rotation} = body
     {x, y} = body.center
     rotation *= degreeToRadiansFactor
-    _rotation.setTo x,
-                y,
-                x + halfWidth  * cos(rotation),
-                y + halfHeight * sin(rotation)
-    @geom _rotation, colors.rotation
+    @renderVectorXY halfWidth  * cos(rotation),
+                    halfHeight * sin(rotation),
+                    body, colors.rotation
     this
 
   renderSpeed: (body) ->
@@ -322,12 +329,15 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
     @renderCircle body.speed, body, colors.speed
     this
 
-  _vector = new Line
-
   renderVector: (vector, body, color) ->
     return this if vector.isZero()
-    @placeVector _vector, body.center, vector
-    @geom _vector, color, no
+    @renderVectorXY vector.x, vector.y, body, color
+    this
+
+  renderVectorXY: (vectorX, vectorY, body, color) ->
+    return this if vectorX is 0 and vectorY is 0
+    {x, y} = body.center
+    @renderLine x, y, x + vectorX, y + vectorY, color
     this
 
   renderVelocity: (body) ->
@@ -363,10 +373,13 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
       maxVelocity:  @renderMaxVelocity .bind this
       obj:          @renderObj         .bind this
       off:          @off               .bind this
+      offset:       @renderOffset      .bind this
       on:           @on                .bind this
       rect:         @renderRect        .bind this
+      rotation:     @renderRotation    .bind this
       show:         @show              .bind this
       speed:        @renderSpeed       .bind this
       vector:       @renderVector      .bind this
+      vectorXY:     @renderVectorXY    .bind this
       velocity:     @renderVelocity    .bind this
       toggle:       @toggle            .bind this
