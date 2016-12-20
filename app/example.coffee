@@ -12,6 +12,7 @@ font = "16px Consolas, Menlo, monospace"
 
 {min, SQRT1_2} = Math
 {ADD} = Phaser.blendModes
+{FOLLOW_TOPDOWN} = Phaser.Camera
 {Quadratic, Sinusoidal} = Phaser.Easing
 {MINUTE, SECOND} = Phaser.Timer
 {mixin} = Phaser.Utils
@@ -61,7 +62,7 @@ init = ->
 
   #  This will run in Canvas mode, so let's gain a little speed and display
   game.renderer.clearBeforeRender = false
-  game.renderer.roundPixels = true
+  # game.renderer.renderSession.roundPixels = true
 
   game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL
 
@@ -79,14 +80,13 @@ preload = ->
   return
 
 create = ->
+  {world} = game
+  {view} = game.camera
 
   #  A spacey background
-  space = game.world.space = game.add.tileSprite 0, 0, game.width, game.height, 'space'
-  space.tilePosition.set game.world.randomX, game.world.randomY
-
-  if game.renderType is Phaser.WEBGL
-    game.add.tween(space.tileScale).to {x: 2, y: 2},
-      1 * MINUTE, Sinusoidal.InOut, yes, 0, 1e6, yes
+  space = world.space = game.add.tileSprite 0, 0, view.width, view.height, 'space'
+  space.fixedToCamera = yes
+  # space.tileScale.set space.texture.width / view.width
 
   #  Our ships bullets
   bullets = game.add.group()
@@ -110,7 +110,7 @@ create = ->
   sprite.body.maxVelocity.set 100
 
   # Asteroids
-  asteroids = game.add.group game.world, "asteroids", no, yes
+  asteroids = game.add.group world, "asteroids", no, yes
   asteroids.classType = Asteroid
   asteroids.createMultiple 5, null, null, yes
 
@@ -121,7 +121,7 @@ create = ->
 
   for key, fun of {
     D:    toggleDim
-    F: -> if game.stepping then game.disableStep() else game.enableStep()
+    F:    toggleStep
     R: -> game.state.restart()
     S: -> game.step()
     T:    game.debug.arcade.toggle
@@ -132,6 +132,10 @@ create = ->
   return
 
 update = ->
+  game.physics.arcade.collide asteroids
+  game.physics.arcade.collide asteroids, sprite
+  game.physics.arcade.overlap asteroids, bullets, (a, b) -> a.explode()
+
   if cursors.up.isDown
     game.physics.arcade.accelerationFromRotation sprite.rotation, 100, sprite.body.acceleration
   else
@@ -142,10 +146,6 @@ update = ->
   else                              sprite.body.angularVelocity = 0
 
   fireBullet() if game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)
-
-  game.physics.arcade.collide asteroids
-  game.physics.arcade.collide asteroids, sprite
-  game.physics.arcade.overlap asteroids, bullets, (a, b) -> a.explode()
 
   screenWrap sprite
   bullets.forEachExists screenWrap, this
@@ -163,10 +163,11 @@ fireBullet = ->
   return
 
 screenWrap = (sprite) ->
-  if sprite.x < 0                then sprite.x = game.width
-  else if sprite.x > game.width  then sprite.x = 0
-  if sprite.y < 0                then sprite.y = game.height
-  else if sprite.y > game.height then sprite.y = 0
+  {world} = game
+  if sprite.x < 0                 then sprite.x = world.width
+  else if sprite.x > world.width  then sprite.x = 0
+  if sprite.y < 0                 then sprite.y = world.height
+  else if sprite.y > world.height then sprite.y = 0
   return
 
 render = ->
@@ -184,6 +185,10 @@ toggleDim = ->
   onOrOff = not game.world.space.visible
   game.world.space.visible = onOrOff
   game.renderer.clearBeforeRender = not onOrOff
+  return
+
+toggleStep = ->
+  if game.stepping then game.disableStep() else game.enableStep()
   return
 
 toggleVisible = ->
