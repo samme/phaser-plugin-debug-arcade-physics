@@ -4,7 +4,7 @@
  */
 
 (function() {
-  var ADD, Asteroid, MINUTE, Quadratic, SECOND, SQRT1_2, Sinusoidal, asteroids, bullet, bulletTime, bullets, create, cursors, fireBullet, font, init, min, mixin, preload, ref, ref1, render, screenWrap, sprite, toggleDim, toggleVisible, update,
+  var ADD, Asteroid, FOLLOW_TOPDOWN, MINUTE, Quadratic, SECOND, SQRT1_2, Sinusoidal, asteroids, bullet, bulletTime, bullets, create, cursors, fireBullet, font, init, min, mixin, preload, ref, ref1, render, screenWrap, sprite, toggleDim, toggleStep, toggleVisible, update,
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
@@ -25,6 +25,8 @@
   min = Math.min, SQRT1_2 = Math.SQRT1_2;
 
   ADD = Phaser.blendModes.ADD;
+
+  FOLLOW_TOPDOWN = Phaser.Camera.FOLLOW_TOPDOWN;
 
   ref = Phaser.Easing, Quadratic = ref.Quadratic, Sinusoidal = ref.Sinusoidal;
 
@@ -93,7 +95,6 @@
     game.debug.font = font;
     game.debug.lineHeight = 20;
     game.renderer.clearBeforeRender = false;
-    game.renderer.roundPixels = true;
     game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
     if (!game.debug.arcade) {
       game.plugins.add(Phaser.Plugin.DebugArcadePhysics);
@@ -110,15 +111,11 @@
   };
 
   create = function() {
-    var fun, key, keyboard, ref2, space;
-    space = game.world.space = game.add.tileSprite(0, 0, game.width, game.height, 'space');
-    space.tilePosition.set(game.world.randomX, game.world.randomY);
-    if (game.renderType === Phaser.WEBGL) {
-      game.add.tween(space.tileScale).to({
-        x: 2,
-        y: 2
-      }, 1 * MINUTE, Sinusoidal.InOut, true, 0, 1e6, true);
-    }
+    var fun, key, keyboard, ref2, space, view, world;
+    world = game.world;
+    view = game.camera.view;
+    space = world.space = game.add.tileSprite(0, 0, view.width, view.height, 'space');
+    space.fixedToCamera = true;
     bullets = game.add.group();
     bullets.enableBody = true;
     bullets.physicsBodyType = Phaser.Physics.ARCADE;
@@ -134,7 +131,7 @@
     sprite.body.drag.set(25);
     sprite.body.friction.setTo(0);
     sprite.body.maxVelocity.set(100);
-    asteroids = game.add.group(game.world, "asteroids", false, true);
+    asteroids = game.add.group(world, "asteroids", false, true);
     asteroids.classType = Asteroid;
     asteroids.createMultiple(5, null, null, true);
     keyboard = game.input.keyboard;
@@ -142,13 +139,7 @@
     keyboard.addKeyCapture([Phaser.Keyboard.SPACEBAR]);
     ref2 = {
       D: toggleDim,
-      F: function() {
-        if (game.stepping) {
-          return game.disableStep();
-        } else {
-          return game.enableStep();
-        }
-      },
+      F: toggleStep,
       R: function() {
         return game.state.restart();
       },
@@ -165,6 +156,11 @@
   };
 
   update = function() {
+    game.physics.arcade.collide(asteroids);
+    game.physics.arcade.collide(asteroids, sprite);
+    game.physics.arcade.overlap(asteroids, bullets, function(a, b) {
+      return a.explode();
+    });
     if (cursors.up.isDown) {
       game.physics.arcade.accelerationFromRotation(sprite.rotation, 100, sprite.body.acceleration);
     } else {
@@ -180,11 +176,6 @@
     if (game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
       fireBullet();
     }
-    game.physics.arcade.collide(asteroids);
-    game.physics.arcade.collide(asteroids, sprite);
-    game.physics.arcade.overlap(asteroids, bullets, function(a, b) {
-      return a.explode();
-    });
     screenWrap(sprite);
     bullets.forEachExists(screenWrap, this);
   };
@@ -203,14 +194,16 @@
   };
 
   screenWrap = function(sprite) {
+    var world;
+    world = game.world;
     if (sprite.x < 0) {
-      sprite.x = game.width;
-    } else if (sprite.x > game.width) {
+      sprite.x = world.width;
+    } else if (sprite.x > world.width) {
       sprite.x = 0;
     }
     if (sprite.y < 0) {
-      sprite.y = game.height;
-    } else if (sprite.y > game.height) {
+      sprite.y = world.height;
+    } else if (sprite.y > world.height) {
       sprite.y = 0;
     }
   };
@@ -224,6 +217,14 @@
     onOrOff = !game.world.space.visible;
     game.world.space.visible = onOrOff;
     game.renderer.clearBeforeRender = !onOrOff;
+  };
+
+  toggleStep = function() {
+    if (game.stepping) {
+      game.disableStep();
+    } else {
+      game.enableStep();
+    }
   };
 
   toggleVisible = function() {
