@@ -4,7 +4,7 @@
   "homepage": "https://github.com/samme/phaser-plugin-debug-arcade-physics/",
   "bugs": "https://github.com/samme/phaser-plugin-debug-arcade-physics/issues",
   "author": "samme",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "license": "MIT",
   "repository": {
     "type": "git",

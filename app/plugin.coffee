@@ -6,7 +6,7 @@
 
 {abs, cos, max, sin} = Math
 {freeze, seal} = Object
-{Bullet, Circle, Line, PARTICLE, Plugin, Point, Rectangle, SPRITE} = Phaser
+{Bullet, Circle, Line, Particle, Plugin, Point, Rectangle, SPRITE} = Phaser
 {sign} = Phaser.Math
 {ARCADE} = Phaser.Physics
 
@@ -31,16 +31,16 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
     obj instanceof Bullet
 
   @isNotBullet = (obj) ->
-    not obj instanceof Bullet
+    not (obj instanceof Bullet)
 
   @isNotParticle = (obj) ->
-    obj.type isnt PARTICLE
+    not (obj instanceof Particle)
 
   @isNotSprite = (obj) ->
     obj.type isnt SPRITE
 
   @isParticle = (obj) ->
-    obj.type is PARTICLE
+    obj instanceof Particle
 
   @isSprite = (obj) ->
     obj.type is SPRITE
