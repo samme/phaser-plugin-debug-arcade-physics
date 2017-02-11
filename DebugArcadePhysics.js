@@ -1,11 +1,11 @@
 
 /*
-  Debug Arcade Physics plugin v0.5.0 (1) for Phaser
+  Debug Arcade Physics plugin v0.5.1 (7) for Phaser
  */
 
 (function() {
   "use strict";
-  var ARCADE, Bullet, Circle, DebugArcadePhysics, Line, PARTICLE, Plugin, Point, Rectangle, SPRITE, abs, cos, degreeToRadiansFactor, freeze, max, seal, sign, sin,
+  var ARCADE, Bullet, Circle, DebugArcadePhysics, Line, Particle, Plugin, Point, Rectangle, SPRITE, abs, cos, degreeToRadiansFactor, freeze, max, seal, sign, sin,
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
@@ -13,7 +13,7 @@
 
   freeze = Object.freeze, seal = Object.seal;
 
-  Bullet = Phaser.Bullet, Circle = Phaser.Circle, Line = Phaser.Line, PARTICLE = Phaser.PARTICLE, Plugin = Phaser.Plugin, Point = Phaser.Point, Rectangle = Phaser.Rectangle, SPRITE = Phaser.SPRITE;
+  Bullet = Phaser.Bullet, Circle = Phaser.Circle, Line = Phaser.Line, Particle = Phaser.Particle, Plugin = Phaser.Plugin, Point = Phaser.Point, Rectangle = Phaser.Rectangle, SPRITE = Phaser.SPRITE;
 
   sign = Phaser.Math.sign;
 
@@ -47,11 +47,11 @@
     };
 
     DebugArcadePhysics.isNotBullet = function(obj) {
-      return !obj instanceof Bullet;
+      return !(obj instanceof Bullet);
     };
 
     DebugArcadePhysics.isNotParticle = function(obj) {
-      return obj.type !== PARTICLE;
+      return !(obj instanceof Particle);
     };
 
     DebugArcadePhysics.isNotSprite = function(obj) {
@@ -59,14 +59,14 @@
     };
 
     DebugArcadePhysics.isParticle = function(obj) {
-      return obj.type === PARTICLE;
+      return obj instanceof Particle;
     };
 
     DebugArcadePhysics.isSprite = function(obj) {
       return obj.type === SPRITE;
     };
 
-    DebugArcadePhysics.VERSION = "0.5.0.1";
+    DebugArcadePhysics.VERSION = "0.5.1.7";
 
     TOO_BIG = 9999;
 
