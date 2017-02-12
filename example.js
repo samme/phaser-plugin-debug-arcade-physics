@@ -4,7 +4,7 @@
  */
 
 (function() {
-  var ADD, Asteroid, FOLLOW_TOPDOWN, MINUTE, Quadratic, SECOND, SQRT1_2, Sinusoidal, asteroids, bullet, bulletTime, bullets, create, cursors, fireBullet, font, init, min, mixin, preload, ref, ref1, render, screenWrap, sprite, toggleDim, toggleStep, toggleVisible, update,
+  var ADD, Asteroid, MINUTE, Quadratic, SECOND, SQRT1_2, Sinusoidal, addGuiKey, asteroids, bullet, bulletTime, bullets, create, createGui, cursors, fireBullet, font, gui, init, min, mixin, preload, ref, ref1, render, screenWrap, shutdown, sprite, toggleDim, toggleStep, toggleVisible, update,
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
@@ -22,11 +22,11 @@
 
   font = "16px Consolas, Menlo, monospace";
 
+  gui = void 0;
+
   min = Math.min, SQRT1_2 = Math.SQRT1_2;
 
   ADD = Phaser.blendModes.ADD;
-
-  FOLLOW_TOPDOWN = Phaser.Camera.FOLLOW_TOPDOWN;
 
   ref = Phaser.Easing, Quadratic = ref.Quadratic, Sinusoidal = ref.Sinusoidal;
 
@@ -48,7 +48,7 @@
       this.anchor.setTo(0.5);
       this.name = "asteroid";
       size = min(this.width, this.height);
-      this.scale.setTo(this.mass = game.rnd.realInRange(0.5, 2));
+      this.scale.setTo(this.mass = game.rnd.realInRange(1, 2));
       offset = size * 0.5 * (1 - SQRT1_2);
       size *= SQRT1_2;
       game.physics.arcade.enable(this);
@@ -76,7 +76,7 @@
       this.game.add.tween(this).to({
         alpha: 0
       }).start().onComplete.add(this.kill, this);
-      return this.game.add.tween(this.scale).to({
+      this.game.add.tween(this.scale).to({
         x: 0,
         y: 0
       }).start();
@@ -94,8 +94,6 @@
   init = function() {
     game.debug.font = font;
     game.debug.lineHeight = 20;
-    game.renderer.clearBeforeRender = false;
-    game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
     if (!game.debug.arcade) {
       game.plugins.add(Phaser.Plugin.DebugArcadePhysics);
     }
@@ -118,7 +116,6 @@
     space.fixedToCamera = true;
     bullets = game.add.group();
     bullets.enableBody = true;
-    bullets.physicsBodyType = Phaser.Physics.ARCADE;
     bullets.createMultiple(10, 'bullet');
     bullets.setAll('alpha', 0.75);
     bullets.setAll('anchor.x', 0.5);
@@ -128,7 +125,7 @@
     sprite.anchor.set(0.5);
     game.physics.enable(sprite, Phaser.Physics.ARCADE);
     sprite.body.bounce.setTo(1);
-    sprite.body.drag.set(25);
+    sprite.body.drag.set(10);
     sprite.body.friction.setTo(0);
     sprite.body.maxVelocity.set(100);
     asteroids = game.add.group(world, "asteroids", false, true);
@@ -153,6 +150,7 @@
       fun = ref2[key];
       keyboard.addKey(Phaser.Keyboard[key]).onDown.add(fun);
     }
+    createGui();
   };
 
   update = function() {
@@ -167,9 +165,9 @@
       sprite.body.acceleration.set(0);
     }
     if (cursors.left.isDown) {
-      sprite.body.angularVelocity = -100;
+      sprite.body.angularVelocity = -90;
     } else if (cursors.right.isDown) {
-      sprite.body.angularVelocity = 100;
+      sprite.body.angularVelocity = 90;
     } else {
       sprite.body.angularVelocity = 0;
     }
@@ -209,14 +207,13 @@
   };
 
   render = function() {
-    return game.debug.text("(T)oggle / (D)im / in(V)isible / (F)reeze / (S)tep 1 frame / (R)estart • Plugin v" + Phaser.Plugin.DebugArcadePhysics.VERSION + " • Phaser v" + Phaser.VERSION, 10, 465, null, "12px Consolas, Menlo, monospace");
+    return game.debug.text("(T)oggle (R)estart • Plugin v" + Phaser.Plugin.DebugArcadePhysics.VERSION + " • Phaser v" + Phaser.VERSION, 5, 470, null, "9px Consolas, Menlo, monospace");
   };
 
   toggleDim = function() {
     var onOrOff;
     onOrOff = !game.world.space.visible;
     game.world.space.visible = onOrOff;
-    game.renderer.clearBeforeRender = !onOrOff;
   };
 
   toggleStep = function() {
@@ -231,15 +228,63 @@
     var visible;
     visible = game.world.alpha !== 1;
     game.world.alpha = +visible;
-    game.renderer.clearBeforeRender = !visible;
   };
 
-  this.game = new Phaser.Game(960, 480, Phaser.CANVAS, 'phaser-example', {
-    init: init,
-    preload: preload,
-    create: create,
-    update: update,
-    render: render
+  shutdown = function() {
+    gui.destroy();
+  };
+
+  addGuiKey = function(_gui, obj, key) {
+    var DebugArcadePhysics;
+    DebugArcadePhysics = Phaser.Plugin.DebugArcadePhysics;
+    console.log(key, obj[key]);
+    switch (key) {
+      case "lineWidth":
+        _gui.add(obj, key, 0, 10, 1).listen();
+        break;
+      default:
+        _gui.add(obj, key).listen();
+    }
+  };
+
+  createGui = function() {
+    var bgF, config, configF, gameF, key, val, worldF;
+    config = game.debug.arcade.config;
+    gui = new dat.GUI({
+      width: 400
+    });
+    configF = gui.addFolder("game.debug.arcade.config");
+    gameF = gui.addFolder("game");
+    worldF = gui.addFolder("world");
+    bgF = gui.addFolder("background");
+    for (key in config) {
+      val = config[key];
+      if (val != null) {
+        addGuiKey(configF, config, key);
+      }
+    }
+    gameF.add(game, "enableStep");
+    gameF.add(game, "disableStep");
+    gameF.add(game, "step");
+    bgF.add(game.world.space, "visible").listen();
+    worldF.add(game.world, "alpha", 0, 1, 0.1).listen();
+    return gui;
+  };
+
+  this.game = new Phaser.Game({
+    width: 960,
+    height: 480,
+    renderer: Phaser.CANVAS,
+    parent: 'phaser-example',
+    scaleMode: Phaser.ScaleManager.SHOW_ALL,
+    state: {
+      create: create,
+      init: init,
+      preload: preload,
+      render: render,
+      shutdown: shutdown,
+      update: update
+    }
   });
 
 }).call(this);
