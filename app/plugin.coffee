@@ -128,16 +128,7 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
   # Helpers
 
   bodyColor: (body) ->
-    {renderBlocked, renderBodyDisabled, renderTouching} = @config
-    {blocked, enable, touching} = body
-    colors[ if renderBodyDisabled and not enable        then "bodyDisabled"
-    else    if renderTouching     and not touching.none then "touching"
-    else    if renderBlocked      and (blocked.down     or
-                                       blocked.up       or
-                                       blocked.left     or
-                                       blocked.right)   then "blocked"
-    else                                                     "body"
-    ]
+    colors[ if @config.renderBodyDisabled and not body.enable then "bodyDisabled" else "body" ]
 
   _calculateDrag = new Point
 
@@ -214,6 +205,10 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
     @renderObj @game.world
     this
 
+  renderBlocked: (body) ->
+    @renderEdges body, body.blocked, @colors.blocked
+    this
+
   renderCenter: (body) ->
     {x, y} = body.center
     {camera} = @game
@@ -249,6 +244,13 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
     @renderVector @calculateDrag(body), body, colors.drag
     this
 
+  renderEdges: (body, edges, color) ->
+    @renderLine body.left , body.top   , body.left , body.bottom, color if edges.left
+    @renderLine body.right, body.top   , body.right, body.bottom, color if edges.right
+    @renderLine body.left , body.top   , body.right, body.top   , color if edges.up
+    @renderLine body.left , body.bottom, body.right, body.bottom, color if edges.down
+    this
+
   renderMaxVelocity: (body) ->
     {maxVelocity} = body
     return this if maxVelocity.x > TOO_BIG or
@@ -271,6 +273,8 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
       return this if filter and not filter(obj)
 
       @renderBody         body if config.renderBody
+      @renderBlocked      body if config.renderBlocked
+      @renderTouching     body if config.renderTouching
       @renderOffset       body if config.renderOffset
       @renderRotation     body if config.renderRotation
       @renderSpeed        body if config.renderSpeed
@@ -327,6 +331,11 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
   renderSpeed: (body) ->
     return this if body.speed < 1
     @renderCircle body.speed, body, colors.speed
+    this
+
+  renderTouching: (body) ->
+    unless body.touching.none
+      @renderEdges body, body.touching, @colors.touching
     this
 
   renderVector: (vector, body, color) ->
