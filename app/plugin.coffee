@@ -1,5 +1,5 @@
 ###
-  Debug Arcade Physics plugin v{!major!}.{!minor!}.{!maintenance!} ({!build!}) for Phaser
+  Debug Arcade Physics plugin v{!major!}.{!minor!}.{!maintenance!} for Phaser
 ###
 
 "use strict"
@@ -45,7 +45,7 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
   @isSprite = (obj) ->
     obj.type is SPRITE
 
-  @VERSION = "{!major!}.{!minor!}.{!maintenance!}.{!build!}"
+  @VERSION = "{!major!}.{!minor!}.{!maintenance!}"
 
   # Private
 
