@@ -1,6 +1,6 @@
 
 /*
-  Debug Arcade Physics plugin v0.6.1 for Phaser
+  Debug Arcade Physics plugin v0.7.0 for Phaser
  */
 
 (function() {
@@ -66,7 +66,7 @@
       return obj.type === SPRITE;
     };
 
-    DebugArcadePhysics.VERSION = "0.6.1";
+    DebugArcadePhysics.VERSION = "0.7.0";
 
     TOO_BIG = 9999;
 
@@ -283,7 +283,7 @@
       var camera, ref, x, y;
       ref = body.center, x = ref.x, y = ref.y;
       camera = this.game.camera;
-      this.game.debug.pixel(~~(x - camera.x), ~~(y - camera.y), colors.center);
+      this.game.debug.pixel(x - camera.x, y - camera.y, colors.center);
       return this;
     };
 

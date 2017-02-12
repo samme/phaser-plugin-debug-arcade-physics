@@ -212,7 +212,7 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
   renderCenter: (body) ->
     {x, y} = body.center
     {camera} = @game
-    @game.debug.pixel ~~(x - camera.x), ~~(y - camera.y), colors.center
+    @game.debug.pixel (x - camera.x), (y - camera.y), colors.center
     this
 
   _circle = new Circle
