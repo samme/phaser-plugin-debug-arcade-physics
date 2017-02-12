@@ -1,6 +1,6 @@
 
 /*
-  Debug Arcade Physics plugin v0.5.1 (7) for Phaser
+  Debug Arcade Physics plugin v0.6.0 (1) for Phaser
  */
 
 (function() {
@@ -66,7 +66,7 @@
       return obj.type === SPRITE;
     };
 
-    DebugArcadePhysics.VERSION = "0.5.1.7";
+    DebugArcadePhysics.VERSION = "0.6.0.1";
 
     TOO_BIG = 9999;
 
@@ -166,10 +166,7 @@
     };
 
     DebugArcadePhysics.prototype.bodyColor = function(body) {
-      var blocked, enable, ref, renderBlocked, renderBodyDisabled, renderTouching, touching;
-      ref = this.config, renderBlocked = ref.renderBlocked, renderBodyDisabled = ref.renderBodyDisabled, renderTouching = ref.renderTouching;
-      blocked = body.blocked, enable = body.enable, touching = body.touching;
-      return colors[renderBodyDisabled && !enable ? "bodyDisabled" : renderTouching && !touching.none ? "touching" : renderBlocked && (blocked.down || blocked.up || blocked.left || blocked.right) ? "blocked" : "body"];
+      return colors[this.config.renderBodyDisabled && !body.enable ? "bodyDisabled" : "body"];
     };
 
     _calculateDrag = new Point;
@@ -277,6 +274,11 @@
       return this;
     };
 
+    DebugArcadePhysics.prototype.renderBlocked = function(body) {
+      this.renderEdges(body, body.blocked, this.colors.blocked);
+      return this;
+    };
+
     DebugArcadePhysics.prototype.renderCenter = function(body) {
       var camera, ref, x, y;
       ref = body.center, x = ref.x, y = ref.y;
@@ -340,6 +342,22 @@
       return this;
     };
 
+    DebugArcadePhysics.prototype.renderEdges = function(body, edges, color) {
+      if (edges.left) {
+        this.renderLine(body.left, body.top, body.left, body.bottom, color);
+      }
+      if (edges.right) {
+        this.renderLine(body.right, body.top, body.right, body.bottom, color);
+      }
+      if (edges.up) {
+        this.renderLine(body.left, body.top, body.right, body.top, color);
+      }
+      if (edges.down) {
+        this.renderLine(body.left, body.bottom, body.right, body.bottom, color);
+      }
+      return this;
+    };
+
     DebugArcadePhysics.prototype.renderMaxVelocity = function(body) {
       var maxVelocity;
       maxVelocity = body.maxVelocity;
@@ -364,6 +382,12 @@
         }
         if (config.renderBody) {
           this.renderBody(body);
+        }
+        if (config.renderBlocked) {
+          this.renderBlocked(body);
+        }
+        if (config.renderTouching) {
+          this.renderTouching(body);
         }
         if (config.renderOffset) {
           this.renderOffset(body);
@@ -446,6 +470,13 @@
         return this;
       }
       this.renderCircle(body.speed, body, colors.speed);
+      return this;
+    };
+
+    DebugArcadePhysics.prototype.renderTouching = function(body) {
+      if (!body.touching.none) {
+        this.renderEdges(body, body.touching, this.colors.touching);
+      }
       return this;
     };
 
