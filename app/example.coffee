@@ -9,10 +9,10 @@ bullets = undefined
 bulletTime = 0
 asteroids = undefined
 font = "16px Consolas, Menlo, monospace"
+gui = undefined
 
 {min, SQRT1_2} = Math
 {ADD} = Phaser.blendModes
-{FOLLOW_TOPDOWN} = Phaser.Camera
 {Quadratic, Sinusoidal} = Phaser.Easing
 {MINUTE, SECOND} = Phaser.Timer
 {mixin} = Phaser.Utils
@@ -20,18 +20,22 @@ font = "16px Consolas, Menlo, monospace"
 class Asteroid extends Phaser.Sprite
 
   constructor: (game, x, y, key, frame, group) ->
-    x   ||= game.world.randomX
-    y   ||= game.world.randomY
-    key  ?= "asteroid#{game.rnd.between 1, 3}"
+    x ||= game.world.randomX
+    y ||= game.world.randomY
+    key ?= "asteroid#{game.rnd.between 1, 3}"
+
     super game, x, y, key, frame, group
+
     @anchor.setTo 0.5
     @name = "asteroid"
     size = min @width, @height
-    @scale.setTo @mass = game.rnd.realInRange(0.5, 2)
+    @scale.setTo @mass = game.rnd.realInRange 1, 2
     offset = size * 0.5 * (1 - SQRT1_2)
     size *= SQRT1_2
+
     game.physics.arcade.enable this
     @body.setSize size, size, offset, offset
+
     mixin
       bounce:
         x: 1
@@ -43,6 +47,7 @@ class Asteroid extends Phaser.Sprite
         x: game.rnd.between(-50, 50)
         y: game.rnd.between(-50, 50)
       , @body
+
     this
 
   explode: ->
@@ -50,6 +55,7 @@ class Asteroid extends Phaser.Sprite
     @blendMode = ADD
     @game.add.tween(this).to(alpha: 0).start().onComplete.add @kill, this
     @game.add.tween(@scale).to(x: 0, y: 0).start()
+    return
 
   update: ->
     @rotation += Math.PI / 300
@@ -60,14 +66,9 @@ init = ->
   game.debug.font = font
   game.debug.lineHeight = 20
 
-  #  This will run in Canvas mode, so let's gain a little speed and display
-  game.renderer.clearBeforeRender = false
-  # game.renderer.renderSession.roundPixels = true
-
-  game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL
-
   unless game.debug.arcade
     game.plugins.add Phaser.Plugin.DebugArcadePhysics
+
   return
 
 preload = ->
@@ -86,12 +87,10 @@ create = ->
   #  A spacey background
   space = world.space = game.add.tileSprite 0, 0, view.width, view.height, 'space'
   space.fixedToCamera = yes
-  # space.tileScale.set space.texture.width / view.width
 
   #  Our ships bullets
   bullets = game.add.group()
   bullets.enableBody = true
-  bullets.physicsBodyType = Phaser.Physics.ARCADE
   #  All 10 of them
   bullets.createMultiple 10, 'bullet'
   bullets.setAll 'alpha', 0.75
@@ -100,12 +99,12 @@ create = ->
   bullets.setAll 'blendMode', ADD
 
   #  Our player ship
-  sprite = game.add.sprite(300, 300, 'ship')
+  sprite = game.add.sprite 300, 300, 'ship'
   sprite.anchor.set 0.5
   #  and its physics settings
   game.physics.enable sprite, Phaser.Physics.ARCADE
   sprite.body.bounce.setTo 1
-  sprite.body.drag.set 25
+  sprite.body.drag.set 10
   sprite.body.friction.setTo 0
   sprite.body.maxVelocity.set 100
 
@@ -129,6 +128,8 @@ create = ->
   }
     keyboard.addKey(Phaser.Keyboard[ key ]).onDown.add fun
 
+  createGui()
+
   return
 
 update = ->
@@ -141,9 +142,9 @@ update = ->
   else
     sprite.body.acceleration.set 0
 
-  if cursors.left.isDown       then sprite.body.angularVelocity = -100
-  else if cursors.right.isDown then sprite.body.angularVelocity = 100
-  else                              sprite.body.angularVelocity = 0
+  if      cursors.left.isDown  then sprite.body.angularVelocity = -90
+  else if cursors.right.isDown then sprite.body.angularVelocity =  90
+  else                              sprite.body.angularVelocity =   0
 
   fireBullet() if game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)
 
@@ -164,27 +165,24 @@ fireBullet = ->
 
 screenWrap = (sprite) ->
   {world} = game
-  if sprite.x < 0                 then sprite.x = world.width
+
+  if      sprite.x < 0            then sprite.x = world.width
   else if sprite.x > world.width  then sprite.x = 0
-  if sprite.y < 0                 then sprite.y = world.height
+  if      sprite.y < 0            then sprite.y = world.height
   else if sprite.y > world.height then sprite.y = 0
+
   return
 
 render = ->
-  game.debug.text "(T)oggle /
-                   (D)im /
-                   in(V)isible /
-                   (F)reeze /
-                   (S)tep 1 frame /
+  game.debug.text "(T)oggle
                    (R)estart •
                    Plugin v#{Phaser.Plugin.DebugArcadePhysics.VERSION} •
                    Phaser v#{Phaser.VERSION}",
-                   10, 465, null, "12px Consolas, Menlo, monospace"
+                   5, 470, null, "9px Consolas, Menlo, monospace"
 
 toggleDim = ->
   onOrOff = not game.world.space.visible
   game.world.space.visible = onOrOff
-  game.renderer.clearBeforeRender = not onOrOff
   return
 
 toggleStep = ->
@@ -194,12 +192,58 @@ toggleStep = ->
 toggleVisible = ->
   visible = game.world.alpha isnt 1
   game.world.alpha = +visible
-  game.renderer.clearBeforeRender = not visible
   return
 
-@game = new (Phaser.Game)(960, 480, Phaser.CANVAS, 'phaser-example',
-  init: init
-  preload: preload
-  create: create
-  update: update
-  render: render)
+shutdown = ->
+  gui.destroy()
+  return
+
+addGuiKey = (_gui, obj, key) ->
+  {DebugArcadePhysics} = Phaser.Plugin
+
+  console.log key, obj[key]
+
+  switch key
+    when "lineWidth"
+      _gui.add(obj, key, 0, 10, 1).listen()
+    else
+      _gui.add(obj, key).listen()
+
+  return
+
+createGui = ->
+  {config} = game.debug.arcade
+
+  gui = new dat.GUI width: 400
+
+  configF = gui.addFolder "game.debug.arcade.config"
+  gameF = gui.addFolder "game"
+  worldF = gui.addFolder "world"
+  bgF = gui.addFolder "background"
+
+  for key, val of config
+    addGuiKey(configF, config, key) if val?
+
+  gameF.add game, "enableStep"
+  gameF.add game, "disableStep"
+  gameF.add game, "step"
+
+  bgF.add(game.world.space, "visible").listen()
+
+  worldF.add(game.world, "alpha", 0, 1, 0.1).listen()
+
+  gui
+
+@game = new Phaser.Game
+  width: 960
+  height: 480
+  renderer: Phaser.CANVAS
+  parent: 'phaser-example'
+  scaleMode: Phaser.ScaleManager.SHOW_ALL
+  state:
+    create: create
+    init: init
+    preload: preload
+    render: render
+    shutdown: shutdown
+    update: update
