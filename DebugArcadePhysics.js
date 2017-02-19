@@ -5,15 +5,15 @@
 
 (function() {
   "use strict";
-  var ARCADE, Bullet, Circle, DebugArcadePhysics, Line, Particle, Plugin, Point, Rectangle, SPRITE, abs, cos, degreeToPxFactor, degreeToRadiansFactor, freeze, max, seal, sign, sin,
+  var ARCADE, Bullet, Circle, DebugArcadePhysics, Line, Particle, Point, Rectangle, SPRITE, abs, cos, degreeToPxFactor, degreeToRadiansFactor, freeze, seal, sign, sin,
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
-  abs = Math.abs, cos = Math.cos, max = Math.max, sin = Math.sin;
+  abs = Math.abs, cos = Math.cos, sin = Math.sin;
 
   freeze = Object.freeze, seal = Object.seal;
 
-  Bullet = Phaser.Bullet, Circle = Phaser.Circle, Line = Phaser.Line, Particle = Phaser.Particle, Plugin = Phaser.Plugin, Point = Phaser.Point, Rectangle = Phaser.Rectangle, SPRITE = Phaser.SPRITE;
+  Bullet = Phaser.Bullet, Circle = Phaser.Circle, Line = Phaser.Line, Particle = Phaser.Particle, Point = Phaser.Point, Rectangle = Phaser.Rectangle, SPRITE = Phaser.SPRITE;
 
   sign = Phaser.Math.sign;
 
@@ -24,7 +24,7 @@
   degreeToPxFactor = 100 / 180;
 
   Phaser.Plugin.DebugArcadePhysics = freeze(DebugArcadePhysics = (function(superClass) {
-    var TOO_BIG, _calculateDrag, _circle, _line, _offset, _rect, aqua, blue, colors, coral, gold, gray, green, indigo, orange, purple, red, rose, violet, white, yellow;
+    var TOO_BIG, _calculateDrag, _circle, _line, _offset, _rect, aqua, blue, colors, coral, gray, green, orange, red, violet, white, yellow;
 
     extend(DebugArcadePhysics, superClass);
 
@@ -78,8 +78,6 @@
 
     orange = "hsla(30 , 100%,  50%, 0.5)";
 
-    gold = "hsla(45 , 100%,  50%, 0.5)";
-
     yellow = "hsla(60 , 100%,  50%, 0.5)";
 
     green = "hsla(120, 100%,  50%, 0.5)";
@@ -88,13 +86,7 @@
 
     blue = "hsla(210, 100%,  50%, 0.5)";
 
-    indigo = "hsla(240, 100%,  50%, 0.5)";
-
-    purple = "hsla(270, 100%,  50%, 0.5)";
-
     violet = "hsla(300, 100%,  50%, 0.5)";
-
-    rose = "hsla(330, 100%,  50%, 0.5)";
 
     white = "hsla(0  ,   0%, 100%, 0.5)";
 
@@ -212,7 +204,7 @@
           this.config[name] = val;
           console.log(name, val);
         } else {
-          console.warn("No such setting '" + name + "'. Use " + (this.configKeys.join(', ')) + ".");
+          console.warn("No such setting '" + name + "'. Use " + (this.configKeys.join(", ")) + ".");
         }
       }
       return this;
@@ -236,12 +228,12 @@
     };
 
     DebugArcadePhysics.prototype.help = function() {
-      console.log("Use `game.debug.arcade`: " + (Object.keys(this.game.debug.arcade).join(', ')));
+      console.log("Use `game.debug.arcade`: " + (Object.keys(this.game.debug.arcade).join(", ")));
       return this;
     };
 
     DebugArcadePhysics.prototype.helpConfig = function() {
-      console.log("Use `game.debug.arcade.configSet()`: " + (this.configKeys.join(', ')));
+      console.log("Use `game.debug.arcade.configSet()`: " + (this.configKeys.join(", ")));
       return this;
     };
 
@@ -297,7 +289,7 @@
         return this;
       }
       center = body.center, halfHeight = body.halfHeight, halfWidth = body.halfWidth, rotation = body.rotation;
-      r = body.rotation * degreeToRadiansFactor;
+      r = rotation * degreeToRadiansFactor;
       rCos = cos(r);
       rSin = sin(r);
       length *= degreeToPxFactor;
@@ -515,9 +507,8 @@
     };
 
     DebugArcadePhysics.prototype.renderRotation = function(body) {
-      var halfHeight, halfWidth, ref, rotation, x, y;
+      var halfHeight, halfWidth, rotation;
       halfHeight = body.halfHeight, halfWidth = body.halfWidth, rotation = body.rotation;
-      ref = body.center, x = ref.x, y = ref.y;
       rotation *= degreeToRadiansFactor;
       this.renderVectorXY(halfWidth * cos(rotation), halfHeight * sin(rotation), body, colors.rotation);
       return this;
