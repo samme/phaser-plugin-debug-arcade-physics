@@ -1,0 +1,9 @@
+*.coffee
+*.html
+*.png
+app/
+bower.json
+bower_components/
+dist/asteroids
+example.js
+version.json
