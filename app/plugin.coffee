@@ -133,7 +133,7 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
   # Helpers
 
   bodyColor: (body) ->
-    colors[ if @config.renderBodyDisabled and not body.enable then "bodyDisabled" else "body" ]
+    colors[ if body.enable then "body" else "bodyDisabled" ]
 
   calculateAngularDrag: (body) ->
     {angularDrag, angularVelocity} = body

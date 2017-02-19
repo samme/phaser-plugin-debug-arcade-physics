@@ -1,6 +1,6 @@
 
 /*
-  Debug Arcade Physics plugin v0.7.0 for Phaser
+  Debug Arcade Physics plugin v0.8.0 for Phaser
  */
 
 (function() {
@@ -21,7 +21,7 @@
 
   degreeToRadiansFactor = Math.PI / 180;
 
-  degreeToPxFactor = Math.PI * 100 / 180;
+  degreeToPxFactor = 100 / 180;
 
   Phaser.Plugin.DebugArcadePhysics = freeze(DebugArcadePhysics = (function(superClass) {
     var TOO_BIG, _calculateDrag, _circle, _line, _offset, _rect, aqua, blue, colors, coral, gold, gray, green, indigo, orange, purple, red, rose, violet, white, yellow;
@@ -68,7 +68,7 @@
       return obj.type === SPRITE;
     };
 
-    DebugArcadePhysics.VERSION = "0.7.0";
+    DebugArcadePhysics.VERSION = "0.8.0";
 
     TOO_BIG = 9999;
 
@@ -171,7 +171,7 @@
     };
 
     DebugArcadePhysics.prototype.bodyColor = function(body) {
-      return colors[this.config.renderBodyDisabled && !body.enable ? "bodyDisabled" : "body"];
+      return colors[body.enable ? "body" : "bodyDisabled"];
     };
 
     DebugArcadePhysics.prototype.calculateAngularDrag = function(body) {
