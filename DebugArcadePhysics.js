@@ -21,7 +21,7 @@
 
   degreeToRadiansFactor = Math.PI / 180;
 
-  degreeToPxFactor = Math.PI * 100;
+  degreeToPxFactor = Math.PI * 100 / 180;
 
   Phaser.Plugin.DebugArcadePhysics = freeze(DebugArcadePhysics = (function(superClass) {
     var TOO_BIG, _calculateDrag, _circle, _line, _offset, _rect, aqua, blue, colors, coral, gold, gray, green, indigo, orange, purple, red, rose, violet, white, yellow;
