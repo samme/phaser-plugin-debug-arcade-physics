@@ -12,6 +12,8 @@
 
 degreeToRadiansFactor = Math.PI / 180
 
+degreeToPxFactor = Math.PI * 100
+
 Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phaser.Plugin
 
   # Constructor
@@ -83,23 +85,26 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
     velocity:     aqua
 
   config: seal
-    filter:             null
-    lineWidth:          1
-    on:                 yes
-    renderAcceleration: yes
-    renderBlocked:      yes
-    renderBody:         yes
-    renderBodyDisabled: yes
-    renderCenter:       yes
-    renderConfig:       no
-    renderDrag:         yes
-    renderMaxVelocity:  yes
-    renderLegend:       yes
-    renderOffset:       yes
-    renderRotation:     yes
-    renderSpeed:        yes
-    renderTouching:     yes
-    renderVelocity:     yes
+    filter:                    null
+    lineWidth:                 1
+    on:                        yes
+    renderAcceleration:        yes
+    renderAngularAcceleration: yes
+    renderAngularDrag:         yes
+    renderAngularVelocity:     yes
+    renderBlocked:             yes
+    renderBody:                yes
+    renderBodyDisabled:        yes
+    renderCenter:              yes
+    renderConfig:              no
+    renderDrag:                yes
+    renderLegend:              yes
+    renderMaxVelocity:         yes
+    renderOffset:              yes
+    renderRotation:            yes
+    renderSpeed:               yes
+    renderTouching:            yes
+    renderVelocity:            yes
 
   configKeys: freeze Object.keys this::config
 
@@ -129,6 +134,12 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
 
   bodyColor: (body) ->
     colors[ if @config.renderBodyDisabled and not body.enable then "bodyDisabled" else "body" ]
+
+  calculateAngularDrag: (body) ->
+    {angularDrag, angularVelocity} = body
+    {physicsElapsed} = @game.time
+    drag = angularDrag * -sign(angularVelocity)
+    if (abs(angularVelocity) - abs(drag * physicsElapsed)) > 0 then drag else 0
 
   _calculateDrag = new Point
 
@@ -205,6 +216,35 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
     @renderObj @game.world
     this
 
+  renderAngularVector: (body, length, color) ->
+    return this if length is 0
+
+    {center, halfHeight, halfWidth, rotation} = body
+
+    r = body.rotation * degreeToRadiansFactor
+    rCos = cos r
+    rSin = sin r
+    length *= degreeToPxFactor
+
+    @renderLineDelta center.x + halfWidth *  rCos,
+                     center.y + halfHeight * rSin,
+                     -rSin  * length,
+                     rCos * length,
+                     color
+    this
+
+  renderAngularAcceleration: (body) ->
+    @renderAngularVector body, body.angularAcceleration, @colors.acceleration
+    this
+
+  renderAngularDrag: (body) ->
+    @renderAngularVector body, @calculateAngularDrag(body), @colors.drag
+    this
+
+  renderAngularVelocity: (body) ->
+    @renderAngularVector body, body.angularVelocity, @colors.velocity
+    this
+
   renderBlocked: (body) ->
     @renderEdges body, body.blocked, @colors.blocked
     this
@@ -272,17 +312,20 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
 
       return this if filter and not filter(obj)
 
-      @renderBody         body if config.renderBody
-      @renderBlocked      body if config.renderBlocked
-      @renderTouching     body if config.renderTouching
-      @renderOffset       body if config.renderOffset
-      @renderRotation     body if config.renderRotation
-      @renderSpeed        body if config.renderSpeed
-      @renderMaxVelocity  body if config.renderMaxVelocity
-      @renderVelocity     body if config.renderVelocity
-      @renderAcceleration body if config.renderAcceleration
-      @renderDrag         body if config.renderDrag
-      @renderCenter       body if config.renderCenter
+      @renderBody                body if config.renderBody
+      @renderBlocked             body if config.renderBlocked
+      @renderTouching            body if config.renderTouching
+      @renderOffset              body if config.renderOffset
+      @renderRotation            body if config.renderRotation
+      @renderSpeed               body if config.renderSpeed
+      @renderMaxVelocity         body if config.renderMaxVelocity
+      @renderVelocity            body if config.renderVelocity
+      @renderAcceleration        body if config.renderAcceleration
+      @renderDrag                body if config.renderDrag
+      @renderAngularVelocity     body if config.renderAngularVelocity
+      @renderAngularAcceleration body if config.renderAngularAcceleration
+      @renderAngularDrag         body if config.renderAngularDrag
+      @renderCenter              body if config.renderCenter
 
     for child in obj.children
       @renderObj child
@@ -297,6 +340,10 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
   renderLine: (startX, startY, endX, endY, color, width) ->
     _line.setTo startX, startY, endX, endY
     @geom _line, color, no, width
+    this
+
+  renderLineDelta: (startX, startY, deltaX, deltaY, color, width) ->
+    @renderLine startX, startY, startX + deltaX, startY + deltaY, color, width
     this
 
   _offset = new Line
@@ -316,8 +363,6 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
     @placeRect _rect, body.center, vector
     @geom _rect, color
     this
-
-  _rotation = new Line
 
   renderRotation: (body) ->
     {halfHeight, halfWidth, rotation} = body
@@ -345,8 +390,7 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
 
   renderVectorXY: (vectorX, vectorY, body, color) ->
     return this if vectorX is 0 and vectorY is 0
-    {x, y} = body.center
-    @renderLine x, y, x + vectorX, y + vectorY, color
+    @renderLineDelta body.center.x, body.center.y, vectorX, vectorY, color
     this
 
   renderVelocity: (body) ->

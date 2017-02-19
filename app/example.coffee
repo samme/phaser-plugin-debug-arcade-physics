@@ -37,6 +37,7 @@ class Asteroid extends Phaser.Sprite
     @body.setSize size, size, offset, offset
 
     mixin
+      angularVelocity: 30
       bounce:
         x: 1
         y: 1
@@ -58,7 +59,6 @@ class Asteroid extends Phaser.Sprite
     return
 
   update: ->
-    @rotation += Math.PI / 300
     @game.world.wrap this
     return
 
@@ -103,6 +103,7 @@ create = ->
   sprite.anchor.set 0.5
   #  and its physics settings
   game.physics.enable sprite, Phaser.Physics.ARCADE
+  sprite.body.angularDrag = 30
   sprite.body.bounce.setTo 1
   sprite.body.drag.set 10
   sprite.body.friction.setTo 0
@@ -137,14 +138,16 @@ update = ->
   game.physics.arcade.collide asteroids, sprite
   game.physics.arcade.overlap asteroids, bullets, (a, b) -> a.explode()
 
+  {body} = sprite
+
   if cursors.up.isDown
-    game.physics.arcade.accelerationFromRotation sprite.rotation, 100, sprite.body.acceleration
+    game.physics.arcade.accelerationFromRotation sprite.rotation, 100, body.acceleration
   else
     sprite.body.acceleration.set 0
 
-  if      cursors.left.isDown  then sprite.body.angularVelocity = -90
-  else if cursors.right.isDown then sprite.body.angularVelocity =  90
-  else                              sprite.body.angularVelocity =   0
+  if      cursors.left.isDown  then body.angularAcceleration = -90
+  else if cursors.right.isDown then body.angularAcceleration =  90
+  else                              body.angularAcceleration =   0
 
   fireBullet() if game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)
 

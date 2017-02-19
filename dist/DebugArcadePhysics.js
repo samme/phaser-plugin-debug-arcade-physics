@@ -5,7 +5,7 @@
 
 (function() {
   "use strict";
-  var ARCADE, Bullet, Circle, DebugArcadePhysics, Line, Particle, Plugin, Point, Rectangle, SPRITE, abs, cos, degreeToRadiansFactor, freeze, max, seal, sign, sin,
+  var ARCADE, Bullet, Circle, DebugArcadePhysics, Line, Particle, Plugin, Point, Rectangle, SPRITE, abs, cos, degreeToPxFactor, degreeToRadiansFactor, freeze, max, seal, sign, sin,
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
@@ -21,8 +21,10 @@
 
   degreeToRadiansFactor = Math.PI / 180;
 
+  degreeToPxFactor = Math.PI * 100;
+
   Phaser.Plugin.DebugArcadePhysics = freeze(DebugArcadePhysics = (function(superClass) {
-    var TOO_BIG, _calculateDrag, _circle, _line, _offset, _rect, _rotation, aqua, blue, colors, coral, gold, gray, green, indigo, orange, purple, red, rose, violet, white, yellow;
+    var TOO_BIG, _calculateDrag, _circle, _line, _offset, _rect, aqua, blue, colors, coral, gold, gray, green, indigo, orange, purple, red, rose, violet, white, yellow;
 
     extend(DebugArcadePhysics, superClass);
 
@@ -118,14 +120,17 @@
       lineWidth: 1,
       on: true,
       renderAcceleration: true,
+      renderAngularAcceleration: true,
+      renderAngularDrag: true,
+      renderAngularVelocity: true,
       renderBlocked: true,
       renderBody: true,
       renderBodyDisabled: true,
       renderCenter: true,
       renderConfig: false,
       renderDrag: true,
-      renderMaxVelocity: true,
       renderLegend: true,
+      renderMaxVelocity: true,
       renderOffset: true,
       renderRotation: true,
       renderSpeed: true,
@@ -167,6 +172,18 @@
 
     DebugArcadePhysics.prototype.bodyColor = function(body) {
       return colors[this.config.renderBodyDisabled && !body.enable ? "bodyDisabled" : "body"];
+    };
+
+    DebugArcadePhysics.prototype.calculateAngularDrag = function(body) {
+      var angularDrag, angularVelocity, drag, physicsElapsed;
+      angularDrag = body.angularDrag, angularVelocity = body.angularVelocity;
+      physicsElapsed = this.game.time.physicsElapsed;
+      drag = angularDrag * -sign(angularVelocity);
+      if ((abs(angularVelocity) - abs(drag * physicsElapsed)) > 0) {
+        return drag;
+      } else {
+        return 0;
+      }
     };
 
     _calculateDrag = new Point;
@@ -271,6 +288,35 @@
 
     DebugArcadePhysics.prototype.renderAll = function() {
       this.renderObj(this.game.world);
+      return this;
+    };
+
+    DebugArcadePhysics.prototype.renderAngularVector = function(body, length, color) {
+      var center, halfHeight, halfWidth, r, rCos, rSin, rotation;
+      if (length === 0) {
+        return this;
+      }
+      center = body.center, halfHeight = body.halfHeight, halfWidth = body.halfWidth, rotation = body.rotation;
+      r = body.rotation * degreeToRadiansFactor;
+      rCos = cos(r);
+      rSin = sin(r);
+      length *= degreeToPxFactor;
+      this.renderLineDelta(center.x + halfWidth * rCos, center.y + halfHeight * rSin, -rSin * length, rCos * length, color);
+      return this;
+    };
+
+    DebugArcadePhysics.prototype.renderAngularAcceleration = function(body) {
+      this.renderAngularVector(body, body.angularAcceleration, this.colors.acceleration);
+      return this;
+    };
+
+    DebugArcadePhysics.prototype.renderAngularDrag = function(body) {
+      this.renderAngularVector(body, this.calculateAngularDrag(body), this.colors.drag);
+      return this;
+    };
+
+    DebugArcadePhysics.prototype.renderAngularVelocity = function(body) {
+      this.renderAngularVector(body, body.angularVelocity, this.colors.velocity);
       return this;
     };
 
@@ -410,6 +456,15 @@
         if (config.renderDrag) {
           this.renderDrag(body);
         }
+        if (config.renderAngularVelocity) {
+          this.renderAngularVelocity(body);
+        }
+        if (config.renderAngularAcceleration) {
+          this.renderAngularAcceleration(body);
+        }
+        if (config.renderAngularDrag) {
+          this.renderAngularDrag(body);
+        }
         if (config.renderCenter) {
           this.renderCenter(body);
         }
@@ -435,6 +490,11 @@
       return this;
     };
 
+    DebugArcadePhysics.prototype.renderLineDelta = function(startX, startY, deltaX, deltaY, color, width) {
+      this.renderLine(startX, startY, startX + deltaX, startY + deltaY, color, width);
+      return this;
+    };
+
     _offset = new Line;
 
     DebugArcadePhysics.prototype.renderOffset = function(body) {
@@ -453,8 +513,6 @@
       this.geom(_rect, color);
       return this;
     };
-
-    _rotation = new Line;
 
     DebugArcadePhysics.prototype.renderRotation = function(body) {
       var halfHeight, halfWidth, ref, rotation, x, y;
@@ -489,12 +547,10 @@
     };
 
     DebugArcadePhysics.prototype.renderVectorXY = function(vectorX, vectorY, body, color) {
-      var ref, x, y;
       if (vectorX === 0 && vectorY === 0) {
         return this;
       }
-      ref = body.center, x = ref.x, y = ref.y;
-      this.renderLine(x, y, x + vectorX, y + vectorY, color);
+      this.renderLineDelta(body.center.x, body.center.y, vectorX, vectorY, color);
       return this;
     };
 
