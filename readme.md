@@ -27,23 +27,26 @@ game.debug.arcade.renderVelocity( player );
 // Optional: configure
 
 game.debug.arcade.configSet({ // default values:
-    filter:             null ,
-    lineWidth:          1    ,
-    on:                 true ,
-    renderAcceleration: true ,
-    renderBlocked:      true ,
-    renderBody:         true ,
-    renderBodyDisabled: true ,
-    renderCenter:       true ,
-    renderConfig:       false,
-    renderDrag:         true ,
-    renderMaxVelocity:  true ,
-    renderLegend:       true ,
-    renderOffset:       true ,
-    renderRotation:     true ,
-    renderSpeed:        true ,
-    renderTouching:     true ,
-    renderVelocity:     true
+    filter:                    null ,
+    lineWidth:                 1    ,
+    on:                        true ,
+    renderAcceleration:        true ,
+    renderAngularAcceleration: true ,
+    renderAngularDrag:         true ,
+    renderAngularVelocity:     true ,
+    renderBlocked:             true ,
+    renderBody:                true ,
+    renderBodyDisabled:        true ,
+    renderCenter:              true ,
+    renderConfig:              false,
+    renderDrag:                true ,
+    renderLegend:              true ,
+    renderMaxVelocity:         true ,
+    renderOffset:              true ,
+    renderRotation:            true ,
+    renderSpeed:               true ,
+    renderTouching:            true ,
+    renderVelocity:            true ,
 }); // -> see console for values
 
 // Or configure during initialization:
