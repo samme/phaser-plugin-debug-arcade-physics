@@ -54,6 +54,7 @@
       game.physics.arcade.enable(this);
       this.body.setSize(size, size, offset, offset);
       mixin({
+        angularVelocity: 30,
         bounce: {
           x: 1,
           y: 1
@@ -83,7 +84,6 @@
     };
 
     Asteroid.prototype.update = function() {
-      this.rotation += Math.PI / 300;
       this.game.world.wrap(this);
     };
 
@@ -124,6 +124,7 @@
     sprite = game.add.sprite(300, 300, 'ship');
     sprite.anchor.set(0.5);
     game.physics.enable(sprite, Phaser.Physics.ARCADE);
+    sprite.body.angularDrag = 30;
     sprite.body.bounce.setTo(1);
     sprite.body.drag.set(10);
     sprite.body.friction.setTo(0);
@@ -154,22 +155,24 @@
   };
 
   update = function() {
+    var body;
     game.physics.arcade.collide(asteroids);
     game.physics.arcade.collide(asteroids, sprite);
     game.physics.arcade.overlap(asteroids, bullets, function(a, b) {
       return a.explode();
     });
+    body = sprite.body;
     if (cursors.up.isDown) {
-      game.physics.arcade.accelerationFromRotation(sprite.rotation, 100, sprite.body.acceleration);
+      game.physics.arcade.accelerationFromRotation(sprite.rotation, 100, body.acceleration);
     } else {
       sprite.body.acceleration.set(0);
     }
     if (cursors.left.isDown) {
-      sprite.body.angularVelocity = -90;
+      body.angularAcceleration = -90;
     } else if (cursors.right.isDown) {
-      sprite.body.angularVelocity = 90;
+      body.angularAcceleration = 90;
     } else {
-      sprite.body.angularVelocity = 0;
+      body.angularAcceleration = 0;
     }
     if (game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
       fireBullet();
