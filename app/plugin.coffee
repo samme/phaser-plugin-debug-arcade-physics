@@ -4,9 +4,9 @@
 
 "use strict"
 
-{abs, cos, max, sin} = Math
+{abs, cos, sin} = Math
 {freeze, seal} = Object
-{Bullet, Circle, Line, Particle, Plugin, Point, Rectangle, SPRITE} = Phaser
+{Bullet, Circle, Line, Particle, Point, Rectangle, SPRITE} = Phaser
 {sign} = Phaser.Math
 {ARCADE} = Phaser.Physics
 
@@ -56,15 +56,11 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
   red    = "hsla(0  , 100%,  50%, 0.5)"
   coral  = "hsla(15 , 100%,  50%, 0.5)"
   orange = "hsla(30 , 100%,  50%, 0.5)"
-  gold   = "hsla(45 , 100%,  50%, 0.5)"
   yellow = "hsla(60 , 100%,  50%, 0.5)"
   green  = "hsla(120, 100%,  50%, 0.5)"
   aqua   = "hsla(180, 100%,  50%, 0.5)"
   blue   = "hsla(210, 100%,  50%, 0.5)"
-  indigo = "hsla(240, 100%,  50%, 0.5)"
-  purple = "hsla(270, 100%,  50%, 0.5)"
   violet = "hsla(300, 100%,  50%, 0.5)"
-  rose   = "hsla(330, 100%,  50%, 0.5)"
   white  = "hsla(0  ,   0%, 100%, 0.5)"
   gray   = "hsla(0  ,   0%,  50%, 0.5)"
 
@@ -160,7 +156,7 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
         @config[name] = val
         console.log name, val
       else
-        console.warn "No such setting '#{name}'. Use #{@configKeys.join ', '}."
+        console.warn "No such setting '#{name}'. Use #{@configKeys.join ", "}."
     this
 
   geom: (obj, color, fill = no, lineWidth = @config.lineWidth) ->
@@ -173,11 +169,11 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
     this
 
   help: ->
-    console.log "Use `game.debug.arcade`: #{Object.keys(@game.debug.arcade).join ', '}"
+    console.log "Use `game.debug.arcade`: #{Object.keys(@game.debug.arcade).join ", "}"
     this
 
   helpConfig: ->
-    console.log "Use `game.debug.arcade.configSet()`: #{@configKeys.join ', '}"
+    console.log "Use `game.debug.arcade.configSet()`: #{@configKeys.join ", "}"
     this
 
   hide: ->
@@ -221,7 +217,7 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
 
     {center, halfHeight, halfWidth, rotation} = body
 
-    r = body.rotation * degreeToRadiansFactor
+    r = rotation * degreeToRadiansFactor
     rCos = cos r
     rSin = sin r
     length *= degreeToPxFactor
@@ -366,7 +362,6 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
 
   renderRotation: (body) ->
     {halfHeight, halfWidth, rotation} = body
-    {x, y} = body.center
     rotation *= degreeToRadiansFactor
     @renderVectorXY halfWidth  * cos(rotation),
                     halfHeight * sin(rotation),

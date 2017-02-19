@@ -4,11 +4,13 @@
  */
 
 (function() {
-  var ADD, Asteroid, MINUTE, Quadratic, SECOND, SQRT1_2, Sinusoidal, addGuiKey, asteroids, bullet, bulletTime, bullets, create, createGui, cursors, fireBullet, font, gui, init, min, mixin, preload, ref, ref1, render, screenWrap, shutdown, sprite, toggleDim, toggleStep, toggleVisible, update,
+  var ADD, Asteroid, Phaser, SQRT1_2, addGuiKey, asteroids, bullet, bulletTime, bullets, create, createGui, cursors, dat, fireBullet, font, game, gui, init, min, mixin, preload, ref, render, screenWrap, ship, shutdown, toggleDim, toggleStep, toggleVisible, update,
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
-  sprite = void 0;
+  game = void 0;
+
+  ship = void 0;
 
   cursors = void 0;
 
@@ -24,34 +26,32 @@
 
   gui = void 0;
 
+  ref = this, dat = ref.dat, Phaser = ref.Phaser;
+
   min = Math.min, SQRT1_2 = Math.SQRT1_2;
 
   ADD = Phaser.blendModes.ADD;
-
-  ref = Phaser.Easing, Quadratic = ref.Quadratic, Sinusoidal = ref.Sinusoidal;
-
-  ref1 = Phaser.Timer, MINUTE = ref1.MINUTE, SECOND = ref1.SECOND;
 
   mixin = Phaser.Utils.mixin;
 
   Asteroid = (function(superClass) {
     extend(Asteroid, superClass);
 
-    function Asteroid(game, x, y, key, frame, group) {
+    function Asteroid(_game, x, y, key, frame, group) {
       var offset, size;
-      x || (x = game.world.randomX);
-      y || (y = game.world.randomY);
+      x || (x = _game.world.randomX);
+      y || (y = _game.world.randomY);
       if (key == null) {
-        key = "asteroid" + (game.rnd.between(1, 3));
+        key = "asteroid" + (_game.rnd.between(1, 3));
       }
-      Asteroid.__super__.constructor.call(this, game, x, y, key, frame, group);
+      Asteroid.__super__.constructor.call(this, _game, x, y, key, frame, group);
       this.anchor.setTo(0.5);
       this.name = "asteroid";
       size = min(this.width, this.height);
       this.scale.setTo(this.mass = game.rnd.realInRange(1, 2));
       offset = size * 0.5 * (1 - SQRT1_2);
       size *= SQRT1_2;
-      game.physics.arcade.enable(this);
+      _game.physics.arcade.enable(this);
       this.body.setSize(size, size, offset, offset);
       mixin({
         angularVelocity: 30,
@@ -64,8 +64,8 @@
           y: 0
         },
         velocity: {
-          x: game.rnd.between(-50, 50),
-          y: game.rnd.between(-50, 50)
+          x: _game.rnd.between(-50, 50),
+          y: _game.rnd.between(-50, 50)
         }
       }, this.body);
       this;
@@ -100,42 +100,42 @@
   };
 
   preload = function() {
-    game.load.image('space', 'asteroids/deep-space.jpg');
-    game.load.image('asteroid1', 'asteroids/asteroid1.png');
-    game.load.image('asteroid2', 'asteroids/asteroid2.png');
-    game.load.image('asteroid3', 'asteroids/asteroid3.png');
-    game.load.image('bullet', 'asteroids/bullets.png');
-    game.load.image('ship', 'asteroids/ship.png');
+    game.load.image("space", "asteroids/deep-space.jpg");
+    game.load.image("asteroid1", "asteroids/asteroid1.png");
+    game.load.image("asteroid2", "asteroids/asteroid2.png");
+    game.load.image("asteroid3", "asteroids/asteroid3.png");
+    game.load.image("bullet", "asteroids/bullets.png");
+    game.load.image("ship", "asteroids/ship.png");
   };
 
   create = function() {
-    var fun, key, keyboard, ref2, space, view, world;
+    var fun, key, keyboard, ref1, space, view, world;
     world = game.world;
     view = game.camera.view;
-    space = world.space = game.add.tileSprite(0, 0, view.width, view.height, 'space');
+    space = world.space = game.add.tileSprite(0, 0, view.width, view.height, "space");
     space.fixedToCamera = true;
     bullets = game.add.group();
     bullets.enableBody = true;
-    bullets.createMultiple(10, 'bullet');
-    bullets.setAll('alpha', 0.75);
-    bullets.setAll('anchor.x', 0.5);
-    bullets.setAll('anchor.y', 0.5);
-    bullets.setAll('blendMode', ADD);
-    sprite = game.add.sprite(300, 300, 'ship');
-    sprite.anchor.set(0.5);
-    game.physics.enable(sprite, Phaser.Physics.ARCADE);
-    sprite.body.angularDrag = 30;
-    sprite.body.bounce.setTo(1);
-    sprite.body.drag.set(10);
-    sprite.body.friction.setTo(0);
-    sprite.body.maxVelocity.set(100);
+    bullets.createMultiple(10, "bullet");
+    bullets.setAll("alpha", 0.75);
+    bullets.setAll("anchor.x", 0.5);
+    bullets.setAll("anchor.y", 0.5);
+    bullets.setAll("blendMode", ADD);
+    ship = game.add.sprite(300, 300, "ship");
+    ship.anchor.set(0.5);
+    game.physics.enable(ship, Phaser.Physics.ARCADE);
+    ship.body.angularDrag = 30;
+    ship.body.bounce.setTo(1);
+    ship.body.drag.set(10);
+    ship.body.friction.setTo(0);
+    ship.body.maxVelocity.set(100);
     asteroids = game.add.group(world, "asteroids", false, true);
     asteroids.classType = Asteroid;
     asteroids.createMultiple(5, null, null, true);
     keyboard = game.input.keyboard;
     cursors = keyboard.createCursorKeys();
     keyboard.addKeyCapture([Phaser.Keyboard.SPACEBAR]);
-    ref2 = {
+    ref1 = {
       D: toggleDim,
       F: toggleStep,
       R: function() {
@@ -147,25 +147,26 @@
       T: game.debug.arcade.toggle,
       V: toggleVisible
     };
-    for (key in ref2) {
-      fun = ref2[key];
+    for (key in ref1) {
+      fun = ref1[key];
       keyboard.addKey(Phaser.Keyboard[key]).onDown.add(fun);
     }
     createGui();
   };
 
   update = function() {
-    var body;
-    game.physics.arcade.collide(asteroids);
-    game.physics.arcade.collide(asteroids, sprite);
-    game.physics.arcade.overlap(asteroids, bullets, function(a, b) {
-      return a.explode();
+    var arcade, body;
+    arcade = game.physics.arcade;
+    arcade.collide(asteroids);
+    arcade.collide(asteroids, ship);
+    arcade.overlap(asteroids, bullets, function(asteroid) {
+      return asteroid.explode();
     });
-    body = sprite.body;
+    body = ship.body;
     if (cursors.up.isDown) {
-      game.physics.arcade.accelerationFromRotation(sprite.rotation, 100, body.acceleration);
+      arcade.accelerationFromRotation(ship.rotation, 100, body.acceleration);
     } else {
-      sprite.body.acceleration.set(0);
+      body.acceleration.set(0);
     }
     if (cursors.left.isDown) {
       body.angularAcceleration = -90;
@@ -177,7 +178,7 @@
     if (game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)) {
       fireBullet();
     }
-    screenWrap(sprite);
+    screenWrap(ship);
     bullets.forEachExists(screenWrap, this);
   };
 
@@ -185,10 +186,10 @@
     if (game.time.now > bulletTime) {
       bullet = bullets.getFirstExists(false);
       if (bullet) {
-        bullet.reset(sprite.body.x + 16, sprite.body.y + 16);
+        bullet.reset(ship.body.x + 16, ship.body.y + 16);
         bullet.lifespan = 2000;
-        bullet.rotation = sprite.rotation;
-        game.physics.arcade.velocityFromRotation(sprite.rotation, 250, bullet.body.velocity);
+        bullet.rotation = ship.rotation;
+        game.physics.arcade.velocityFromRotation(ship.rotation, 250, bullet.body.velocity);
         bulletTime = game.time.now + 100;
       }
     }
@@ -214,9 +215,9 @@
   };
 
   toggleDim = function() {
-    var onOrOff;
-    onOrOff = !game.world.space.visible;
-    game.world.space.visible = onOrOff;
+    var visible;
+    visible = !game.world.space.visible;
+    game.world.space.visible = visible;
   };
 
   toggleStep = function() {
@@ -238,9 +239,6 @@
   };
 
   addGuiKey = function(_gui, obj, key) {
-    var DebugArcadePhysics;
-    DebugArcadePhysics = Phaser.Plugin.DebugArcadePhysics;
-    console.log(key, obj[key]);
     switch (key) {
       case "lineWidth":
         _gui.add(obj, key, 0, 10, 1).listen();
@@ -274,11 +272,11 @@
     return gui;
   };
 
-  this.game = new Phaser.Game({
+  game = new Phaser.Game({
     width: 960,
     height: 480,
     renderer: Phaser.CANVAS,
-    parent: 'phaser-example',
+    parent: "phaser-example",
     scaleMode: Phaser.ScaleManager.SHOW_ALL,
     state: {
       create: create,

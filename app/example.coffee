@@ -2,7 +2,8 @@
   http://phaser.io/examples/v2/arcade-physics/asteroids-movement
 ###
 
-sprite = undefined
+game = undefined
+ship = undefined
 cursors = undefined
 bullet = undefined
 bullets = undefined
@@ -11,20 +12,19 @@ asteroids = undefined
 font = "16px Consolas, Menlo, monospace"
 gui = undefined
 
+{dat, Phaser} = this
 {min, SQRT1_2} = Math
 {ADD} = Phaser.blendModes
-{Quadratic, Sinusoidal} = Phaser.Easing
-{MINUTE, SECOND} = Phaser.Timer
 {mixin} = Phaser.Utils
 
 class Asteroid extends Phaser.Sprite
 
-  constructor: (game, x, y, key, frame, group) ->
-    x ||= game.world.randomX
-    y ||= game.world.randomY
-    key ?= "asteroid#{game.rnd.between 1, 3}"
+  constructor: (_game, x, y, key, frame, group) ->
+    x ||= _game.world.randomX
+    y ||= _game.world.randomY
+    key ?= "asteroid#{_game.rnd.between 1, 3}"
 
-    super game, x, y, key, frame, group
+    super _game, x, y, key, frame, group
 
     @anchor.setTo 0.5
     @name = "asteroid"
@@ -33,7 +33,7 @@ class Asteroid extends Phaser.Sprite
     offset = size * 0.5 * (1 - SQRT1_2)
     size *= SQRT1_2
 
-    game.physics.arcade.enable this
+    _game.physics.arcade.enable this
     @body.setSize size, size, offset, offset
 
     mixin
@@ -45,8 +45,8 @@ class Asteroid extends Phaser.Sprite
         x: 0
         y: 0
       velocity:
-        x: game.rnd.between(-50, 50)
-        y: game.rnd.between(-50, 50)
+        x: _game.rnd.between -50, 50
+        y: _game.rnd.between -50, 50
       , @body
 
     this
@@ -72,12 +72,12 @@ init = ->
   return
 
 preload = ->
-  game.load.image 'space',     'asteroids/deep-space.jpg'
-  game.load.image 'asteroid1', 'asteroids/asteroid1.png'
-  game.load.image 'asteroid2', 'asteroids/asteroid2.png'
-  game.load.image 'asteroid3', 'asteroids/asteroid3.png'
-  game.load.image 'bullet',    'asteroids/bullets.png'
-  game.load.image 'ship',      'asteroids/ship.png'
+  game.load.image "space",     "asteroids/deep-space.jpg"
+  game.load.image "asteroid1", "asteroids/asteroid1.png"
+  game.load.image "asteroid2", "asteroids/asteroid2.png"
+  game.load.image "asteroid3", "asteroids/asteroid3.png"
+  game.load.image "bullet",    "asteroids/bullets.png"
+  game.load.image "ship",      "asteroids/ship.png"
   return
 
 create = ->
@@ -85,29 +85,30 @@ create = ->
   {view} = game.camera
 
   #  A spacey background
-  space = world.space = game.add.tileSprite 0, 0, view.width, view.height, 'space'
+  space = world.space = game.add.tileSprite 0, 0, view.width, view.height, "space"
   space.fixedToCamera = yes
 
   #  Our ships bullets
   bullets = game.add.group()
   bullets.enableBody = true
   #  All 10 of them
-  bullets.createMultiple 10, 'bullet'
-  bullets.setAll 'alpha', 0.75
-  bullets.setAll 'anchor.x', 0.5
-  bullets.setAll 'anchor.y', 0.5
-  bullets.setAll 'blendMode', ADD
+  bullets.createMultiple 10, "bullet"
+  bullets.setAll "alpha", 0.75
+  bullets.setAll "anchor.x", 0.5
+  bullets.setAll "anchor.y", 0.5
+  bullets.setAll "blendMode", ADD
 
   #  Our player ship
-  sprite = game.add.sprite 300, 300, 'ship'
-  sprite.anchor.set 0.5
+  ship = game.add.sprite 300, 300, "ship"
+  ship.anchor.set 0.5
+
   #  and its physics settings
-  game.physics.enable sprite, Phaser.Physics.ARCADE
-  sprite.body.angularDrag = 30
-  sprite.body.bounce.setTo 1
-  sprite.body.drag.set 10
-  sprite.body.friction.setTo 0
-  sprite.body.maxVelocity.set 100
+  game.physics.enable ship, Phaser.Physics.ARCADE
+  ship.body.angularDrag = 30
+  ship.body.bounce.setTo 1
+  ship.body.drag.set 10
+  ship.body.friction.setTo 0
+  ship.body.maxVelocity.set 100
 
   # Asteroids
   asteroids = game.add.group world, "asteroids", no, yes
@@ -134,16 +135,18 @@ create = ->
   return
 
 update = ->
-  game.physics.arcade.collide asteroids
-  game.physics.arcade.collide asteroids, sprite
-  game.physics.arcade.overlap asteroids, bullets, (a, b) -> a.explode()
+  {arcade} = game.physics
 
-  {body} = sprite
+  arcade.collide asteroids
+  arcade.collide asteroids, ship
+  arcade.overlap asteroids, bullets, (asteroid) -> asteroid.explode()
+
+  {body} = ship
 
   if cursors.up.isDown
-    game.physics.arcade.accelerationFromRotation sprite.rotation, 100, body.acceleration
+    arcade.accelerationFromRotation ship.rotation, 100, body.acceleration
   else
-    sprite.body.acceleration.set 0
+    body.acceleration.set 0
 
   if      cursors.left.isDown  then body.angularAcceleration = -90
   else if cursors.right.isDown then body.angularAcceleration =  90
@@ -151,7 +154,7 @@ update = ->
 
   fireBullet() if game.input.keyboard.isDown(Phaser.Keyboard.SPACEBAR)
 
-  screenWrap sprite
+  screenWrap ship
   bullets.forEachExists screenWrap, this
   return
 
@@ -159,10 +162,10 @@ fireBullet = ->
   if game.time.now > bulletTime
     bullet = bullets.getFirstExists(false)
     if bullet
-      bullet.reset sprite.body.x + 16, sprite.body.y + 16
+      bullet.reset ship.body.x + 16, ship.body.y + 16
       bullet.lifespan = 2000
-      bullet.rotation = sprite.rotation
-      game.physics.arcade.velocityFromRotation sprite.rotation, 250, bullet.body.velocity
+      bullet.rotation = ship.rotation
+      game.physics.arcade.velocityFromRotation ship.rotation, 250, bullet.body.velocity
       bulletTime = game.time.now + 100
   return
 
@@ -184,8 +187,8 @@ render = ->
                    5, 470, null, "9px Consolas, Menlo, monospace"
 
 toggleDim = ->
-  onOrOff = not game.world.space.visible
-  game.world.space.visible = onOrOff
+  visible = not game.world.space.visible
+  game.world.space.visible = visible
   return
 
 toggleStep = ->
@@ -202,10 +205,6 @@ shutdown = ->
   return
 
 addGuiKey = (_gui, obj, key) ->
-  {DebugArcadePhysics} = Phaser.Plugin
-
-  console.log key, obj[key]
-
   switch key
     when "lineWidth"
       _gui.add(obj, key, 0, 10, 1).listen()
@@ -237,11 +236,11 @@ createGui = ->
 
   gui
 
-@game = new Phaser.Game
+game = new Phaser.Game
   width: 960
   height: 480
   renderer: Phaser.CANVAS
-  parent: 'phaser-example'
+  parent: "phaser-example"
   scaleMode: Phaser.ScaleManager.SHOW_ALL
   state:
     create: create
