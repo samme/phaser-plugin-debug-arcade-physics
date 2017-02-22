@@ -17,6 +17,7 @@
     "build": "brunch build --production",
     "preversion": "eslint dist",
     "version": "npm run build && git add app dist --all",
+    "pub": "np",
     "postpublish": "git subtree push --prefix dist origin gh-pages"
   },
   "dependencies": {
