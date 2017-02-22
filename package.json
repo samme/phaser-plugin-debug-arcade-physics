@@ -26,7 +26,6 @@
   "devDependencies": {
     "auto-reload-brunch": "^2",
     "coffee-script-brunch": "^2",
-    "coffeelint-brunch": "^2",
     "javascript-brunch": "^2",
     "uglify-js-brunch": "^2",
     "version-brunch": "^1.0.1"
