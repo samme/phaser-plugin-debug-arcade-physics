@@ -1,8 +1,6 @@
 env:
   browser: yes
 extends: 'eslint:recommended'
-globals:
-  Phaser: no
 rules:
   indent:
     - 'off'
