@@ -24,7 +24,7 @@
   degreeToPxFactor = 100 / 180;
 
   Phaser.Plugin.DebugArcadePhysics = freeze(DebugArcadePhysics = (function(superClass) {
-    var TOO_BIG, _calculateDrag, _circle, _line, _offset, _rect, aqua, blue, colors, coral, gray, green, orange, red, violet, white, yellow;
+    var TOO_BIG, _calculateDrag, _circle, _line, _offset, _rect, aqua, blue, coral, gray, green, orange, red, violet, white, yellow;
 
     extend(DebugArcadePhysics, superClass);
 
@@ -92,8 +92,11 @@
 
     gray = "hsla(0  ,   0%,  50%, 0.5)";
 
-    DebugArcadePhysics.prototype.colors = colors = {
+    DebugArcadePhysics.prototype.colors = {
       acceleration: violet,
+      angularAcceleration: violet,
+      angularDrag: orange,
+      angularVelocity: aqua,
       blocked: coral,
       body: yellow,
       bodyDisabled: gray,
@@ -163,7 +166,7 @@
     };
 
     DebugArcadePhysics.prototype.bodyColor = function(body) {
-      return colors[body.enable ? "body" : "bodyDisabled"];
+      return this.colors[body.enable ? "body" : "bodyDisabled"];
     };
 
     DebugArcadePhysics.prototype.calculateAngularDrag = function(body) {
@@ -274,7 +277,7 @@
     };
 
     DebugArcadePhysics.prototype.renderAcceleration = function(body) {
-      this.renderVector(body.acceleration, body, colors.acceleration);
+      this.renderVector(body.acceleration, body, this.colors.acceleration);
       return this;
     };
 
@@ -321,7 +324,7 @@
       var camera, ref, x, y;
       ref = body.center, x = ref.x, y = ref.y;
       camera = this.game.camera;
-      this.game.debug.pixel(x - camera.x, y - camera.y, colors.center);
+      this.game.debug.pixel(x - camera.x, y - camera.y, this.colors.center);
       return this;
     };
 
@@ -376,7 +379,7 @@
     };
 
     DebugArcadePhysics.prototype.renderDrag = function(body) {
-      this.renderVector(this.calculateDrag(body), body, colors.drag);
+      this.renderVector(this.calculateDrag(body), body, this.colors.drag);
       return this;
     };
 
@@ -402,7 +405,7 @@
       if (maxVelocity.x > TOO_BIG || maxVelocity.y > TOO_BIG) {
         return this;
       }
-      this.renderRect(maxVelocity, body, colors.maxVelocity);
+      this.renderRect(maxVelocity, body, this.colors.maxVelocity);
       return this;
     };
 
@@ -491,7 +494,7 @@
 
     DebugArcadePhysics.prototype.renderOffset = function(body) {
       this.placeVectorXY(_offset, body.position.x, body.position.y, -body.offset.x * body.sprite.scale.x, -body.offset.y * body.sprite.scale.y);
-      this.geom(_offset, colors.offset, false);
+      this.geom(_offset, this.colors.offset, false);
       return this;
     };
 
@@ -510,7 +513,7 @@
       var halfHeight, halfWidth, rotation;
       halfHeight = body.halfHeight, halfWidth = body.halfWidth, rotation = body.rotation;
       rotation *= degreeToRadiansFactor;
-      this.renderVectorXY(halfWidth * cos(rotation), halfHeight * sin(rotation), body, colors.rotation);
+      this.renderVectorXY(halfWidth * cos(rotation), halfHeight * sin(rotation), body, this.colors.rotation);
       return this;
     };
 
@@ -518,7 +521,7 @@
       if (body.speed < 1) {
         return this;
       }
-      this.renderCircle(body.speed, body, colors.speed);
+      this.renderCircle(body.speed, body, this.colors.speed);
       return this;
     };
 
@@ -546,7 +549,7 @@
     };
 
     DebugArcadePhysics.prototype.renderVelocity = function(body) {
-      this.renderVector(body.velocity, body, colors.velocity);
+      this.renderVector(body.velocity, body, this.colors.velocity);
       return this;
     };
 
