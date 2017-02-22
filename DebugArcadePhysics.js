@@ -1,6 +1,6 @@
 
 /*
-  Debug Arcade Physics plugin v{!major!}.{!minor!}.{!maintenance!} for Phaser
+  Debug Arcade Physics plugin v1.0.0 for Phaser
  */
 
 (function() {
@@ -24,7 +24,7 @@
   degreeToPxFactor = 100 / 180;
 
   Phaser.Plugin.DebugArcadePhysics = freeze(DebugArcadePhysics = (function(superClass) {
-    var TOO_BIG, _calculateDrag, _circle, _line, _offset, _rect, aqua, blue, coral, gray, green, orange, red, violet, white, yellow;
+    var TOO_BIG, _calculateDrag, _circle, _line, _offset, _rect, aqua, blue, colors, coral, gray, green, orange, red, violet, white, yellow;
 
     extend(DebugArcadePhysics, superClass);
 
@@ -68,17 +68,17 @@
       return obj.type === SPRITE;
     };
 
-    DebugArcadePhysics.VERSION = "{!major!}.{!minor!}.{!maintenance!}";
+    DebugArcadePhysics.VERSION = "1.0.0";
 
     TOO_BIG = 9999;
 
-    red = "hsla(  0, 100%,  50%, 0.5)";
+    red = "hsla(0  , 100%,  50%, 0.5)";
 
-    coral = "hsla( 15, 100%,  50%, 0.5)";
+    coral = "hsla(15 , 100%,  50%, 0.5)";
 
-    orange = "hsla( 30, 100%,  50%, 0.5)";
+    orange = "hsla(30 , 100%,  50%, 0.5)";
 
-    yellow = "hsla( 60, 100%,  50%, 0.5)";
+    yellow = "hsla(60 , 100%,  50%, 0.5)";
 
     green = "hsla(120, 100%,  50%, 0.5)";
 
@@ -88,15 +88,12 @@
 
     violet = "hsla(300, 100%,  50%, 0.5)";
 
-    white = "hsla(  0,   0%, 100%, 0.5)";
+    white = "hsla(0  ,   0%, 100%, 0.5)";
 
-    gray = "hsla(  0,   0%,  50%, 0.5)";
+    gray = "hsla(0  ,   0%,  50%, 0.5)";
 
-    DebugArcadePhysics.prototype.colors = {
+    DebugArcadePhysics.prototype.colors = colors = {
       acceleration: violet,
-      angularAcceleration: violet,
-      angularDrag: orange,
-      angularVelocity: aqua,
       blocked: coral,
       body: yellow,
       bodyDisabled: gray,
@@ -166,7 +163,7 @@
     };
 
     DebugArcadePhysics.prototype.bodyColor = function(body) {
-      return this.colors[body.enable ? "body" : "bodyDisabled"];
+      return colors[body.enable ? "body" : "bodyDisabled"];
     };
 
     DebugArcadePhysics.prototype.calculateAngularDrag = function(body) {
@@ -277,7 +274,7 @@
     };
 
     DebugArcadePhysics.prototype.renderAcceleration = function(body) {
-      this.renderVector(body.acceleration, body, this.colors.acceleration);
+      this.renderVector(body.acceleration, body, colors.acceleration);
       return this;
     };
 
@@ -324,7 +321,7 @@
       var camera, ref, x, y;
       ref = body.center, x = ref.x, y = ref.y;
       camera = this.game.camera;
-      this.game.debug.pixel(x - camera.x, y - camera.y, this.colors.center);
+      this.game.debug.pixel(x - camera.x, y - camera.y, colors.center);
       return this;
     };
 
@@ -379,7 +376,7 @@
     };
 
     DebugArcadePhysics.prototype.renderDrag = function(body) {
-      this.renderVector(this.calculateDrag(body), body, this.colors.drag);
+      this.renderVector(this.calculateDrag(body), body, colors.drag);
       return this;
     };
 
@@ -405,7 +402,7 @@
       if (maxVelocity.x > TOO_BIG || maxVelocity.y > TOO_BIG) {
         return this;
       }
-      this.renderRect(maxVelocity, body, this.colors.maxVelocity);
+      this.renderRect(maxVelocity, body, colors.maxVelocity);
       return this;
     };
 
@@ -494,7 +491,7 @@
 
     DebugArcadePhysics.prototype.renderOffset = function(body) {
       this.placeVectorXY(_offset, body.position.x, body.position.y, -body.offset.x * body.sprite.scale.x, -body.offset.y * body.sprite.scale.y);
-      this.geom(_offset, this.colors.offset, false);
+      this.geom(_offset, colors.offset, false);
       return this;
     };
 
@@ -513,7 +510,7 @@
       var halfHeight, halfWidth, rotation;
       halfHeight = body.halfHeight, halfWidth = body.halfWidth, rotation = body.rotation;
       rotation *= degreeToRadiansFactor;
-      this.renderVectorXY(halfWidth * cos(rotation), halfHeight * sin(rotation), body, this.colors.rotation);
+      this.renderVectorXY(halfWidth * cos(rotation), halfHeight * sin(rotation), body, colors.rotation);
       return this;
     };
 
@@ -521,7 +518,7 @@
       if (body.speed < 1) {
         return this;
       }
-      this.renderCircle(body.speed, body, this.colors.speed);
+      this.renderCircle(body.speed, body, colors.speed);
       return this;
     };
 
@@ -549,7 +546,7 @@
     };
 
     DebugArcadePhysics.prototype.renderVelocity = function(body) {
-      this.renderVector(body.velocity, body, this.colors.velocity);
+      this.renderVector(body.velocity, body, colors.velocity);
       return this;
     };
 
@@ -589,10 +586,10 @@
         rotation: this.renderRotation.bind(this),
         show: this.show.bind(this),
         speed: this.renderSpeed.bind(this),
-        toggle: this.toggle.bind(this),
         vector: this.renderVector.bind(this),
         vectorXY: this.renderVectorXY.bind(this),
-        velocity: this.renderVelocity.bind(this)
+        velocity: this.renderVelocity.bind(this),
+        toggle: this.toggle.bind(this)
       });
     };
 
@@ -602,90 +599,3 @@
 
 }).call(this);
 
-/* jshint ignore:start */
-(function() {
-  var WebSocket = window.WebSocket || window.MozWebSocket;
-  var br = window.brunch = (window.brunch || {});
-  var ar = br['auto-reload'] = (br['auto-reload'] || {});
-  if (!WebSocket || ar.disabled) return;
-  if (window._ar) return;
-  window._ar = true;
-
-  var cacheBuster = function(url){
-    var date = Math.round(Date.now() / 1000).toString();
-    url = url.replace(/(\&|\\?)cacheBuster=\d*/, '');
-    return url + (url.indexOf('?') >= 0 ? '&' : '?') +'cacheBuster=' + date;
-  };
-
-  var browser = navigator.userAgent.toLowerCase();
-  var forceRepaint = ar.forceRepaint || browser.indexOf('chrome') > -1;
-
-  var reloaders = {
-    page: function(){
-      window.location.reload(true);
-    },
-
-    stylesheet: function(){
-      [].slice
-        .call(document.querySelectorAll('link[rel=stylesheet]'))
-        .filter(function(link) {
-          var val = link.getAttribute('data-autoreload');
-          return link.href && val != 'false';
-        })
-        .forEach(function(link) {
-          link.href = cacheBuster(link.href);
-        });
-
-      // Hack to force page repaint after 25ms.
-      if (forceRepaint) setTimeout(function() { document.body.offsetHeight; }, 25);
-    },
-
-    javascript: function(){
-      var scripts = [].slice.call(document.querySelectorAll('script'));
-      var textScripts = scripts.map(function(script) { return script.text }).filter(function(text) { return text.length > 0 });
-      var srcScripts = scripts.filter(function(script) { return script.src });
-
-      var loaded = 0;
-      var all = srcScripts.length;
-      var onLoad = function() {
-        loaded = loaded + 1;
-        if (loaded === all) {
-          textScripts.forEach(function(script) { eval(script); });
-        }
-      }
-
-      srcScripts
-        .forEach(function(script) {
-          var src = script.src;
-          script.remove();
-          var newScript = document.createElement('script');
-          newScript.src = cacheBuster(src);
-          newScript.async = true;
-          newScript.onload = onLoad;
-          document.head.appendChild(newScript);
-        });
-    }
-  };
-  var port = ar.port || 9485;
-  var host = br.server || window.location.hostname || 'localhost';
-
-  var connect = function(){
-    var connection = new WebSocket('ws://' + host + ':' + port);
-    connection.onmessage = function(event){
-      if (ar.disabled) return;
-      var message = event.data;
-      var reloader = reloaders[message] || reloaders.page;
-      reloader();
-    };
-    connection.onerror = function(){
-      if (connection.readyState) connection.close();
-    };
-    connection.onclose = function(){
-      window.setTimeout(connect, 1000);
-    };
-  };
-  connect();
-})();
-/* jshint ignore:end */
-
-;
