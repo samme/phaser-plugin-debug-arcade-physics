@@ -53,32 +53,35 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
 
   TOO_BIG = 9999
 
-  red    = "hsla(0  , 100%,  50%, 0.5)"
-  coral  = "hsla(15 , 100%,  50%, 0.5)"
-  orange = "hsla(30 , 100%,  50%, 0.5)"
-  yellow = "hsla(60 , 100%,  50%, 0.5)"
+  red    = "hsla(  0, 100%,  50%, 0.5)"
+  coral  = "hsla( 15, 100%,  50%, 0.5)"
+  orange = "hsla( 30, 100%,  50%, 0.5)"
+  yellow = "hsla( 60, 100%,  50%, 0.5)"
   green  = "hsla(120, 100%,  50%, 0.5)"
   aqua   = "hsla(180, 100%,  50%, 0.5)"
   blue   = "hsla(210, 100%,  50%, 0.5)"
   violet = "hsla(300, 100%,  50%, 0.5)"
-  white  = "hsla(0  ,   0%, 100%, 0.5)"
-  gray   = "hsla(0  ,   0%,  50%, 0.5)"
+  white  = "hsla(  0,   0%, 100%, 0.5)"
+  gray   = "hsla(  0,   0%,  50%, 0.5)"
 
   # Prototype
 
-  colors: colors =
-    acceleration: violet
-    blocked:      coral
-    body:         yellow
-    bodyDisabled: gray
-    center:       white
-    drag:         orange
-    maxVelocity:  green
-    offset:       yellow
-    rotation:     yellow
-    speed:        blue
-    touching:     red
-    velocity:     aqua
+  colors:
+    acceleration:        violet
+    angularAcceleration: violet
+    angularDrag:         orange
+    angularVelocity:     aqua
+    blocked:             coral
+    body:                yellow
+    bodyDisabled:        gray
+    center:              white
+    drag:                orange
+    maxVelocity:         green
+    offset:              yellow
+    rotation:            yellow
+    speed:               blue
+    touching:            red
+    velocity:            aqua
 
   config: seal
     filter:                    null
@@ -129,7 +132,7 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
   # Helpers
 
   bodyColor: (body) ->
-    colors[ if body.enable then "body" else "bodyDisabled" ]
+    @colors[ if body.enable then "body" else "bodyDisabled" ]
 
   calculateAngularDrag: (body) ->
     {angularDrag, angularVelocity} = body
@@ -205,7 +208,7 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
     line.setTo startX, startY, startX + vectorX, startY + vectorY
 
   renderAcceleration: (body) ->
-    @renderVector body.acceleration, body, colors.acceleration
+    @renderVector body.acceleration, body, @colors.acceleration
     this
 
   renderAll: ->
@@ -248,7 +251,7 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
   renderCenter: (body) ->
     {x, y} = body.center
     {camera} = @game
-    @game.debug.pixel (x - camera.x), (y - camera.y), colors.center
+    @game.debug.pixel (x - camera.x), (y - camera.y), @colors.center
     this
 
   _circle = new Circle
@@ -277,7 +280,7 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
     this
 
   renderDrag: (body) ->
-    @renderVector @calculateDrag(body), body, colors.drag
+    @renderVector @calculateDrag(body), body, @colors.drag
     this
 
   renderEdges: (body, edges, color) ->
@@ -291,7 +294,7 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
     {maxVelocity} = body
     return this if maxVelocity.x > TOO_BIG or
                    maxVelocity.y > TOO_BIG
-    @renderRect maxVelocity, body, colors.maxVelocity
+    @renderRect maxVelocity, body, @colors.maxVelocity
     this
 
   renderObj: (obj) ->
@@ -349,7 +352,7 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
                             body.position.y,
                             -body.offset.x * body.sprite.scale.x,
                             -body.offset.y * body.sprite.scale.y
-    @geom _offset, colors.offset, no
+    @geom _offset, @colors.offset, no
     this
 
   _rect = new Rectangle
@@ -365,12 +368,12 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
     rotation *= degreeToRadiansFactor
     @renderVectorXY halfWidth  * cos(rotation),
                     halfHeight * sin(rotation),
-                    body, colors.rotation
+                    body, @colors.rotation
     this
 
   renderSpeed: (body) ->
     return this if body.speed < 1
-    @renderCircle body.speed, body, colors.speed
+    @renderCircle body.speed, body, @colors.speed
     this
 
   renderTouching: (body) ->
@@ -389,7 +392,7 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
     this
 
   renderVelocity: (body) ->
-    @renderVector body.velocity, body, colors.velocity
+    @renderVector body.velocity, body, @colors.velocity
     this
 
   show: ->
@@ -427,7 +430,7 @@ Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phase
       rotation:     @renderRotation    .bind this
       show:         @show              .bind this
       speed:        @renderSpeed       .bind this
+      toggle:       @toggle            .bind this
       vector:       @renderVector      .bind this
       vectorXY:     @renderVectorXY    .bind this
       velocity:     @renderVelocity    .bind this
-      toggle:       @toggle            .bind this
