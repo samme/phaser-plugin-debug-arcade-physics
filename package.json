@@ -2,13 +2,15 @@
   "name": "phaser-plugin-debug-arcade-physics",
   "description": "Draws properties of Arcade Physics bodies",
   "homepage": "https://github.com/samme/phaser-plugin-debug-arcade-physics/",
-  "bugs": "https://github.com/samme/phaser-plugin-debug-arcade-physics/issues",
+  "bugs": {
+    "url": "https://github.com/samme/phaser-plugin-debug-arcade-physics/issues"
+  },
   "author": "samme",
   "version": "0.8.1",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/samme/phaser-plugin-debug-arcade-physics.git"
+    "url": "git+https://github.com/samme/phaser-plugin-debug-arcade-physics.git"
   },
   "scripts": {
     "start": "brunch watch --server",
@@ -27,5 +29,10 @@
     "javascript-brunch": "^2",
     "uglify-js-brunch": "^2",
     "version-brunch": "^1.0.1"
-  }
+  },
+  "main": "dist/DebugArcadePhysics.js",
+  "keywords": [
+    "phaser",
+    "phaser-plugin"
+  ]
 }
