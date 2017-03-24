@@ -9,7 +9,7 @@ bullet = undefined
 bullets = undefined
 bulletTime = 0
 asteroids = undefined
-font = "16px Consolas, Menlo, monospace"
+font = "12px Consolas, Menlo, monospace"
 gui = undefined
 
 {dat, Phaser} = this
@@ -64,7 +64,7 @@ class Asteroid extends Phaser.Sprite
 
 init = ->
   game.debug.font = font
-  game.debug.lineHeight = 20
+  game.debug.lineHeight = 15
 
   unless game.debug.arcade
     game.plugins.add Phaser.Plugin.DebugArcadePhysics
@@ -214,14 +214,19 @@ addGuiKey = (_gui, obj, key) ->
   return
 
 createGui = ->
-  {config} = game.debug.arcade
+  {arcade} = game.debug
+  {config} = arcade
 
   gui = new dat.GUI width: 400
 
-  configF = gui.addFolder "game.debug.arcade.config"
   gameF = gui.addFolder "game"
+  pluginF = gui.addFolder "game.debug.arcade"
+  configF = gui.addFolder "game.debug.arcade.config"
   worldF = gui.addFolder "world"
   bgF = gui.addFolder "background"
+  
+  for key in ["off", "on", "toggle"]
+    pluginF.add arcade, key
 
   for key, val of config
     addGuiKey(configF, config, key) if val?

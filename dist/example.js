@@ -22,7 +22,7 @@
 
   asteroids = void 0;
 
-  font = "16px Consolas, Menlo, monospace";
+  font = "12px Consolas, Menlo, monospace";
 
   gui = void 0;
 
@@ -93,7 +93,7 @@
 
   init = function() {
     game.debug.font = font;
-    game.debug.lineHeight = 20;
+    game.debug.lineHeight = 15;
     if (!game.debug.arcade) {
       game.plugins.add(Phaser.Plugin.DebugArcadePhysics);
     }
@@ -249,15 +249,22 @@
   };
 
   createGui = function() {
-    var bgF, config, configF, gameF, key, val, worldF;
-    config = game.debug.arcade.config;
+    var arcade, bgF, config, configF, gameF, i, key, len, pluginF, ref1, val, worldF;
+    arcade = game.debug.arcade;
+    config = arcade.config;
     gui = new dat.GUI({
       width: 400
     });
-    configF = gui.addFolder("game.debug.arcade.config");
     gameF = gui.addFolder("game");
+    pluginF = gui.addFolder("game.debug.arcade");
+    configF = gui.addFolder("game.debug.arcade.config");
     worldF = gui.addFolder("world");
     bgF = gui.addFolder("background");
+    ref1 = ["off", "on", "toggle"];
+    for (i = 0, len = ref1.length; i < len; i++) {
+      key = ref1[i];
+      pluginF.add(arcade, key);
+    }
     for (key in config) {
       val = config[key];
       if (val != null) {
