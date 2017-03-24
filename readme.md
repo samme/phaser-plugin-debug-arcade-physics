@@ -1,11 +1,11 @@
-![Screenshot](https://samme.github.io/phaser-plugin-debug-arcade-physics/screenshot.png)
+Draws properties of Arcade Physics bodies. [Demo](https://samme.github.io/phaser-plugin-debug-arcade-physics/)
 
-[Demo](https://samme.github.io/phaser-plugin-debug-arcade-physics/)
+![Screenshot](https://samme.github.io/phaser-plugin-debug-arcade-physics/screenshot.png)
 
 Install
 -------
 
-If not using `npm` or `bower`, add [DebugArcadePhysics.js](dist/DebugArcadePhysics.js) after `phaser.js`.
+If not using `npm` or `bower`, add [DebugArcadePhysics.js](dist/DebugArcadePhysics.js) after phaser.js.
 
 Use 🚀
 ---
@@ -13,24 +13,18 @@ Use 🚀
 ```javascript
 game.plugins.add(Phaser.Plugin.DebugArcadePhysics);
 
-// Draw every physics body
+// OR
 
-game.debug.arcade.on()
+game.plugins.add(Phaser.Plugin.DebugArcadePhysics, {
+    // options … (see Configure, below)
+});
+```
 
-// Draw none
+### Configure
 
-game.debug.arcade.off()
+You can try these in the [demo](https://samme.github.io/phaser-plugin-debug-arcade-physics/).
 
-// Draw one
-
-game.debug.arcade.renderObj( player );
-
-// Draw one property of one body
-
-game.debug.arcade.renderVelocity( player );
-
-// Optional: configure
-
+```javascript
 game.debug.arcade.configSet({ // default values:
     filter:                    null ,
     lineWidth:                 1    ,
@@ -53,35 +47,49 @@ game.debug.arcade.configSet({ // default values:
     renderTouching:            true ,
     renderVelocity:            true ,
 }); // -> see console for values
+```
 
-// Or configure during initialization:
+### Filters
 
-game.plugins.add(Phaser.Plugin.DebugArcadePhysics, {
-    on: true
+Some filters are included:
+ - `exists`
+ - `isAlive`
+ - `isBullet`
+ - `isNotBullet`
+ - `isNotParticle`
+ - `isNotSprite`
+ - `isParticle`
+ - `isSprite`
+
+```javascript
+// Example:
+// Hide bodies of objects w/ exists=false (Phaser ignores these, but doesn't disable them)
+game.debug.arcade.configSet({
+    filter: Phaser.Plugin.DebugArcadePhysics.exists
+});
+
+// Example:
+// Keep automatic rendering 'on' but limit to Bullets
+game.debug.arcade.configSet({
+    filter: Phaser.Plugin.DebugArcadePhysics.isBullet
 });
 
 // Example:
 // Keep automatic rendering 'on' but limit to certain objects:
-
 game.debug.arcade.configSet({
-    filter: function (obj){
-        return obj.name === "player";
-    }
+  filter: function (obj) { return obj.name === "player" }
 });
+```
 
-// Some filters are included:
-// - exists
-// - isAlive
-// - isBullet
-// - isNotBullet
-// - isNotParticle
-// - isNotSprite
-// - isParticle
-// - isSprite
+### Special uses
 
-// Example:
+```javascript
+// Turn automatic rendering off
+game.debug.arcade.off()
 
-game.debug.arcade.configSet({
-    filter: Phaser.Plugin.DebugArcadePhysics.isBullet
-});
+// Draw just one body
+game.debug.arcade.renderObj(player);
+
+// Draw one property of one body
+game.debug.arcade.renderVelocity(player);
 ```
