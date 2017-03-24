@@ -14,7 +14,7 @@ degreeToRadiansFactor = Math.PI / 180
 
 degreeToPxFactor = 100 / 180
 
-Phaser.Plugin.DebugArcadePhysics = freeze class DebugArcadePhysics extends Phaser.Plugin
+freeze class Phaser.Plugin.DebugArcadePhysics extends Phaser.Plugin
 
   # Constructor
 
