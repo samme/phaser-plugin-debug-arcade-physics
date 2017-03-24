@@ -5,7 +5,7 @@
 
 (function() {
   "use strict";
-  var ARCADE, Bullet, Circle, DebugArcadePhysics, Line, Particle, Point, Rectangle, SPRITE, abs, cos, degreeToPxFactor, degreeToRadiansFactor, freeze, seal, sign, sin,
+  var ARCADE, Bullet, Circle, Line, Particle, Point, Rectangle, SPRITE, abs, cos, degreeToPxFactor, degreeToRadiansFactor, freeze, seal, sign, sin,
     extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
     hasProp = {}.hasOwnProperty;
 
@@ -23,7 +23,7 @@
 
   degreeToPxFactor = 100 / 180;
 
-  Phaser.Plugin.DebugArcadePhysics = freeze(DebugArcadePhysics = (function(superClass) {
+  freeze(Phaser.Plugin.DebugArcadePhysics = (function(superClass) {
     var TOO_BIG, _calculateDrag, _circle, _line, _offset, _rect, aqua, blue, coral, gray, green, orange, red, violet, white, yellow;
 
     extend(DebugArcadePhysics, superClass);
