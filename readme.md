@@ -26,6 +26,7 @@ You can try these in the [demo](https://samme.github.io/phaser-plugin-debug-arca
 
 ```javascript
 game.debug.arcade.configSet({ // default values:
+    bodyFilled:                false,
     filter:                    null ,
     lineWidth:                 1    ,
     on:                        true ,

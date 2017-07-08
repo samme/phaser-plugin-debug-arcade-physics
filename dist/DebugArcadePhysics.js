@@ -24,7 +24,7 @@
   degreeToPxFactor = 100 / 180;
 
   freeze(Phaser.Plugin.DebugArcadePhysics = (function(superClass) {
-    var TOO_BIG, _calculateDrag, _circle, _line, _offset, _rect, aqua, blue, coral, gray, green, orange, red, violet, white, yellow;
+    var TOO_BIG, _calculateDrag, _circle, _line, _offset, _rect, aqua, blue, coral, gray, green, mango, orange, red, violet, white, yellow;
 
     extend(DebugArcadePhysics, superClass);
 
@@ -78,6 +78,8 @@
 
     orange = "hsla(30 , 100%,  50%, 0.5)";
 
+    mango = "hsla(45,  100%,  50%, 0.5)";
+
     yellow = "hsla(60 , 100%,  50%, 0.5)";
 
     green = "hsla(120, 100%,  50%, 0.5)";
@@ -102,6 +104,7 @@
       bodyDisabled: gray,
       center: white,
       drag: orange,
+      embedded: mango,
       maxVelocity: green,
       offset: yellow,
       rotation: yellow,
@@ -111,6 +114,7 @@
     };
 
     DebugArcadePhysics.prototype.config = seal({
+      bodyFilled: false,
       filter: null,
       lineWidth: 1,
       on: true,
@@ -166,7 +170,7 @@
     };
 
     DebugArcadePhysics.prototype.bodyColor = function(body) {
-      return this.colors[body.enable ? "body" : "bodyDisabled"];
+      return this.colors[body.enable ? (body.embedded ? "embedded" : "body") : "bodyDisabled"];
     };
 
     DebugArcadePhysics.prototype.calculateAngularDrag = function(body) {
@@ -473,7 +477,7 @@
     };
 
     DebugArcadePhysics.prototype.renderBody = function(body) {
-      this.game.debug.body(body.sprite, this.bodyColor(body), false);
+      this.game.debug.body(body.sprite, this.bodyColor(body), this.config.bodyFilled);
       return this;
     };
 

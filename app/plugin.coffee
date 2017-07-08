@@ -56,6 +56,7 @@ freeze class Phaser.Plugin.DebugArcadePhysics extends Phaser.Plugin
   red    = "hsla(0  , 100%,  50%, 0.5)"
   coral  = "hsla(15 , 100%,  50%, 0.5)"
   orange = "hsla(30 , 100%,  50%, 0.5)"
+  mango  = "hsla(45,  100%,  50%, 0.5)"
   yellow = "hsla(60 , 100%,  50%, 0.5)"
   green  = "hsla(120, 100%,  50%, 0.5)"
   aqua   = "hsla(180, 100%,  50%, 0.5)"
@@ -76,6 +77,7 @@ freeze class Phaser.Plugin.DebugArcadePhysics extends Phaser.Plugin
     bodyDisabled:        gray
     center:              white
     drag:                orange
+    embedded:            mango
     maxVelocity:         green
     offset:              yellow
     rotation:            yellow
@@ -84,6 +86,7 @@ freeze class Phaser.Plugin.DebugArcadePhysics extends Phaser.Plugin
     velocity:            aqua
 
   config: seal
+    bodyFilled:                no
     filter:                    null
     lineWidth:                 1
     on:                        yes
@@ -132,7 +135,7 @@ freeze class Phaser.Plugin.DebugArcadePhysics extends Phaser.Plugin
   # Helpers
 
   bodyColor: (body) ->
-    @colors[ if body.enable then "body" else "bodyDisabled" ]
+    @colors[ if body.enable then (if body.embedded then "embedded" else "body") else "bodyDisabled"]
 
   calculateAngularDrag: (body) ->
     {angularDrag, angularVelocity} = body
@@ -331,7 +334,7 @@ freeze class Phaser.Plugin.DebugArcadePhysics extends Phaser.Plugin
     this
 
   renderBody: (body) ->
-    @game.debug.body body.sprite, @bodyColor(body), no
+    @game.debug.body body.sprite, @bodyColor(body), @config.bodyFilled
     this
 
   _line = new Line
