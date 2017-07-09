@@ -24,9 +24,7 @@
     "version.json"
   ],
   "dependencies": {
-    "phaser": "^2.6.2"
-  },
-  "ignoredDependencies": [
-    "phaser"
-  ]
+    "phaser": "^2.6.2",
+    "dat.gui": "dataarts/dat.gui#^0.6.5"
+  }
 }

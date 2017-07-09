@@ -2,8 +2,9 @@ module.exports =
   files:
     javascripts:
       joinTo:
-        'DebugArcadePhysics.js': 'app/plugin.coffee',
+        'DebugArcadePhysics.js': 'app/plugin.coffee'
         'example.js':            'app/example.coffee'
+        'vendor.js':             'bower_components/**'
   modules:
     definition: no
     wrapper: no
