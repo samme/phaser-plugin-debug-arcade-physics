@@ -22,7 +22,7 @@
 
   asteroids = void 0;
 
-  font = "12px Consolas, Menlo, monospace";
+  font = "16px Consolas, Menlo, monospace";
 
   gui = void 0;
 
@@ -93,7 +93,7 @@
 
   init = function() {
     game.debug.font = font;
-    game.debug.lineHeight = 15;
+    game.debug.lineHeight = 20;
     if (!game.debug.arcade) {
       game.plugins.add(Phaser.Plugin.DebugArcadePhysics);
     }
@@ -121,7 +121,7 @@
     bullets.setAll("anchor.x", 0.5);
     bullets.setAll("anchor.y", 0.5);
     bullets.setAll("blendMode", ADD);
-    ship = game.add.sprite(300, 300, "ship");
+    ship = game.add.sprite(world.centerX, world.centerY, "ship");
     ship.anchor.set(0.5);
     game.physics.enable(ship, Phaser.Physics.ARCADE);
     ship.body.angularDrag = 30;
@@ -131,7 +131,7 @@
     ship.body.maxVelocity.set(100);
     asteroids = game.add.group(world, "asteroids", false, true);
     asteroids.classType = Asteroid;
-    asteroids.createMultiple(5, null, null, true);
+    asteroids.createMultiple(Math.ceil(game.width * game.height / 1e5), null, null, true);
     keyboard = game.input.keyboard;
     cursors = keyboard.createCursorKeys();
     keyboard.addKeyCapture([Phaser.Keyboard.SPACEBAR]);
@@ -211,7 +211,7 @@
   };
 
   render = function() {
-    return game.debug.text("(T)oggle (R)estart • Plugin v" + Phaser.Plugin.DebugArcadePhysics.VERSION + " • Phaser v" + Phaser.VERSION, 5, 470, null, "9px Consolas, Menlo, monospace");
+    return game.debug.text("(T)oggle (R)estart • Plugin v" + Phaser.Plugin.DebugArcadePhysics.VERSION + " • Phaser v" + Phaser.VERSION, 320, 20, null, game.debug.font);
   };
 
   toggleDim = function() {
@@ -280,11 +280,11 @@
   };
 
   game = new Phaser.Game({
-    width: 960,
-    height: 480,
+    width: "100%",
+    height: "100%",
     renderer: Phaser.CANVAS,
     parent: "phaser-example",
-    scaleMode: Phaser.ScaleManager.SHOW_ALL,
+    scaleMode: Phaser.ScaleManager.NO_SCALE,
     state: {
       create: create,
       init: init,

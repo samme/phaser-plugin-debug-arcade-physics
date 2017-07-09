@@ -9,7 +9,7 @@ bullet = undefined
 bullets = undefined
 bulletTime = 0
 asteroids = undefined
-font = "12px Consolas, Menlo, monospace"
+font = "16px Consolas, Menlo, monospace"
 gui = undefined
 
 {dat, Phaser} = this
@@ -64,7 +64,7 @@ class Asteroid extends Phaser.Sprite
 
 init = ->
   game.debug.font = font
-  game.debug.lineHeight = 15
+  game.debug.lineHeight = 20
 
   unless game.debug.arcade
     game.plugins.add Phaser.Plugin.DebugArcadePhysics
@@ -99,7 +99,7 @@ create = ->
   bullets.setAll "blendMode", ADD
 
   #  Our player ship
-  ship = game.add.sprite 300, 300, "ship"
+  ship = game.add.sprite world.centerX, world.centerY, "ship"
   ship.anchor.set 0.5
 
   #  and its physics settings
@@ -113,7 +113,7 @@ create = ->
   # Asteroids
   asteroids = game.add.group world, "asteroids", no, yes
   asteroids.classType = Asteroid
-  asteroids.createMultiple 5, null, null, yes
+  asteroids.createMultiple Math.ceil(game.width * game.height / 1e5), null, null, yes
 
   #  Game input
   {keyboard} = game.input
@@ -184,7 +184,7 @@ render = ->
                    (R)estart •
                    Plugin v#{Phaser.Plugin.DebugArcadePhysics.VERSION} •
                    Phaser v#{Phaser.VERSION}",
-                   5, 470, null, "9px Consolas, Menlo, monospace"
+                   320, 20, null, game.debug.font
 
 toggleDim = ->
   visible = not game.world.space.visible
@@ -242,11 +242,11 @@ createGui = ->
   gui
 
 game = new Phaser.Game
-  width: 960
-  height: 480
+  width: "100%"
+  height: "100%"
   renderer: Phaser.CANVAS
   parent: "phaser-example"
-  scaleMode: Phaser.ScaleManager.SHOW_ALL
+  scaleMode: Phaser.ScaleManager.NO_SCALE
   state:
     create: create
     init: init
