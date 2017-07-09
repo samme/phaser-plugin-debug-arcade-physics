@@ -5,16 +5,20 @@ Draws properties of Arcade Physics bodies. [Demo](https://samme.github.io/phaser
 Install
 -------
 
-If not using `npm` or `bower`, add [DebugArcadePhysics.js](dist/DebugArcadePhysics.js) after phaser.js.
+    npm install -S phaser-plugin-debug-physics
+
+or
+
+    bower install -S samme/phaser-plugin-debug-physics
+
+or add [DebugArcadePhysics.js](dist/DebugArcadePhysics.js) after phaser.js.
 
 Use 🚀
 ---
 
 ```javascript
 game.plugins.add(Phaser.Plugin.DebugArcadePhysics);
-
 // OR
-
 game.plugins.add(Phaser.Plugin.DebugArcadePhysics, {
     // options … (see Configure, below)
 });
