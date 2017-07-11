@@ -1,6 +1,6 @@
 
 /*
-  Debug Arcade Physics plugin v1.1.1 for Phaser
+  Debug Arcade Physics plugin v1.1.2 for Phaser
  */
 
 (function() {
@@ -68,7 +68,7 @@
       return obj.type === SPRITE;
     };
 
-    DebugArcadePhysics.VERSION = "1.1.1";
+    DebugArcadePhysics.VERSION = "1.1.2";
 
     TOO_BIG = 9999;
 
