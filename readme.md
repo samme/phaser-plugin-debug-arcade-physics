@@ -5,11 +5,11 @@ Draws properties of Arcade Physics bodies. [Demo](https://samme.github.io/phaser
 Install
 -------
 
-    npm install -S phaser-plugin-debug-physics
+    npm install -S phaser-plugin-debug-arcade-physics
 
 or
 
-    bower install -S samme/phaser-plugin-debug-physics
+    bower install -S samme/phaser-plugin-debug-arcade-physics
 
 or add [DebugArcadePhysics.js](dist/DebugArcadePhysics.js) after phaser.js.
 
