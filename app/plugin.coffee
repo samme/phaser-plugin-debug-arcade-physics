@@ -59,6 +59,7 @@ freeze class Phaser.Plugin.DebugArcadePhysics extends Phaser.Plugin
   mango  = "hsla(45,  100%,  50%, 0.5)"
   yellow = "hsla(60 , 100%,  50%, 0.5)"
   green  = "hsla(120, 100%,  50%, 0.5)"
+  flora  = "hsla(150, 100%,  50%, 0.5)"
   aqua   = "hsla(180, 100%,  50%, 0.5)"
   blue   = "hsla(210, 100%,  50%, 0.5)"
   violet = "hsla(300, 100%,  50%, 0.5)"
@@ -78,6 +79,7 @@ freeze class Phaser.Plugin.DebugArcadePhysics extends Phaser.Plugin
     center:              white
     drag:                orange
     embedded:            mango
+    friction:            flora
     maxVelocity:         green
     offset:              yellow
     rotation:            yellow
@@ -100,6 +102,7 @@ freeze class Phaser.Plugin.DebugArcadePhysics extends Phaser.Plugin
     renderCenter:              yes
     renderConfig:              no
     renderDrag:                yes
+    renderFriction:            yes
     renderLegend:              yes
     renderMaxVelocity:         yes
     renderOffset:              yes
@@ -293,6 +296,13 @@ freeze class Phaser.Plugin.DebugArcadePhysics extends Phaser.Plugin
     @renderLine body.left , body.bottom, body.right, body.bottom, color if edges.down
     this
 
+  renderFriction: (body) ->
+    unless body.touching.none or body.friction.isZero()
+      @renderVectorXY body.friction.x * body.velocity.x,
+                      body.friction.y * body.velocity.y,
+                      body, @colors.friction
+    this
+
   renderMaxVelocity: (body) ->
     {maxVelocity} = body
     return this if maxVelocity.x > TOO_BIG or
@@ -324,6 +334,7 @@ freeze class Phaser.Plugin.DebugArcadePhysics extends Phaser.Plugin
       @renderVelocity            body if config.renderVelocity
       @renderAcceleration        body if config.renderAcceleration
       @renderDrag                body if config.renderDrag
+      @renderFriction            body if config.renderFriction
       @renderAngularVelocity     body if config.renderAngularVelocity
       @renderAngularAcceleration body if config.renderAngularAcceleration
       @renderAngularDrag         body if config.renderAngularDrag
