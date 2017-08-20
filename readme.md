@@ -44,6 +44,7 @@ game.debug.arcade.configSet({ // default values:
     renderCenter:              true ,
     renderConfig:              false,
     renderDrag:                true ,
+    renderFriction:            true ,
     renderLegend:              true ,
     renderMaxVelocity:         true ,
     renderOffset:              true ,
