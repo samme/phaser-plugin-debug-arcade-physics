@@ -24,7 +24,7 @@
   degreeToPxFactor = 100 / 180;
 
   freeze(Phaser.Plugin.DebugArcadePhysics = (function(superClass) {
-    var TOO_BIG, _calculateDrag, _circle, _line, _offset, _rect, aqua, blue, coral, gray, green, mango, orange, red, violet, white, yellow;
+    var TOO_BIG, _calculateDrag, _circle, _line, _offset, _rect, aqua, blue, coral, flora, gray, green, mango, orange, red, violet, white, yellow;
 
     extend(DebugArcadePhysics, superClass);
 
@@ -84,6 +84,8 @@
 
     green = "hsla(120, 100%,  50%, 0.5)";
 
+    flora = "hsla(150, 100%,  50%, 0.5)";
+
     aqua = "hsla(180, 100%,  50%, 0.5)";
 
     blue = "hsla(210, 100%,  50%, 0.5)";
@@ -105,6 +107,7 @@
       center: white,
       drag: orange,
       embedded: mango,
+      friction: flora,
       maxVelocity: green,
       offset: yellow,
       rotation: yellow,
@@ -128,6 +131,7 @@
       renderCenter: true,
       renderConfig: false,
       renderDrag: true,
+      renderFriction: true,
       renderLegend: true,
       renderMaxVelocity: true,
       renderOffset: true,
@@ -403,6 +407,13 @@
       return this;
     };
 
+    DebugArcadePhysics.prototype.renderFriction = function(body) {
+      if (!(body.touching.none || body.friction.isZero())) {
+        this.renderVectorXY(body.friction.x * body.velocity.x, body.friction.y * body.velocity.y, body, this.colors.friction);
+      }
+      return this;
+    };
+
     DebugArcadePhysics.prototype.renderMaxVelocity = function(body) {
       var maxVelocity;
       maxVelocity = body.maxVelocity;
@@ -454,6 +465,9 @@
         }
         if (config.renderDrag) {
           this.renderDrag(body);
+        }
+        if (config.renderFriction) {
+          this.renderFriction(body);
         }
         if (config.renderAngularVelocity) {
           this.renderAngularVelocity(body);
