@@ -58,6 +58,7 @@ freeze class Phaser.Plugin.DebugArcadePhysics extends Phaser.Plugin
   orange = "hsla(30 , 100%,  50%, 0.5)"
   mango  = "hsla(45,  100%,  50%, 0.5)"
   yellow = "hsla(60 , 100%,  50%, 0.5)"
+  umber  = "hsla(60 , 100%,  25%, 0.5)"
   green  = "hsla(120, 100%,  50%, 0.5)"
   flora  = "hsla(150, 100%,  50%, 0.5)"
   aqua   = "hsla(180, 100%,  50%, 0.5)"
@@ -77,6 +78,7 @@ freeze class Phaser.Plugin.DebugArcadePhysics extends Phaser.Plugin
     body:                yellow
     bodyDisabled:        gray
     center:              white
+    collisionNone:       umber
     drag:                orange
     embedded:            mango
     friction:            flora
@@ -138,7 +140,11 @@ freeze class Phaser.Plugin.DebugArcadePhysics extends Phaser.Plugin
   # Helpers
 
   bodyColor: (body) ->
-    @colors[ if body.enable then (if body.embedded then "embedded" else "body") else "bodyDisabled"]
+    switch yes
+      when body.enable is off       then @colors.bodyDisabled
+      when body.checkCollision.none then @colors.collisionNone
+      when body.embedded            then @colors.embedded
+      else                               @colors.body
 
   calculateAngularDrag: (body) ->
     {angularDrag, angularVelocity} = body
