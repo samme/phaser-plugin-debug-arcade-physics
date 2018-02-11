@@ -72,12 +72,13 @@ init = ->
   return
 
 preload = ->
-  game.load.image "space",     "asteroids/deep-space.jpg"
-  game.load.image "asteroid1", "asteroids/asteroid1.png"
-  game.load.image "asteroid2", "asteroids/asteroid2.png"
-  game.load.image "asteroid3", "asteroids/asteroid3.png"
-  game.load.image "bullet",    "asteroids/bullets.png"
-  game.load.image "ship",      "asteroids/ship.png"
+  game.load.path = "example/assets/"
+  game.load.image "space",     "deep-space.jpg"
+  game.load.image "asteroid1", "asteroid1.png"
+  game.load.image "asteroid2", "asteroid2.png"
+  game.load.image "asteroid3", "asteroid3.png"
+  game.load.image "bullet",    "bullets.png"
+  game.load.image "ship",      "ship.png"
   return
 
 create = ->
@@ -224,7 +225,7 @@ createGui = ->
   configF = gui.addFolder "game.debug.arcade.config"
   worldF = gui.addFolder "world"
   bgF = gui.addFolder "background"
-  
+
   for key in ["off", "on", "toggle"]
     pluginF.add arcade, key
 
