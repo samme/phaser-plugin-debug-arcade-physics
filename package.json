@@ -15,7 +15,7 @@
   "scripts": {
     "start": "brunch watch --server",
     "build": "brunch build --production",
-    "test": "eslint dist/DebugArcadePhysics.js dist/example/index.js",
+    "test": "node -c dist/DebugArcadePhysics.js; node -c dist/example/index.js",
     "preversion": "npm run test",
     "version": "npm run build && git add app dist --all && git status --short",
     "pub": "np",
